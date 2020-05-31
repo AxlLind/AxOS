@@ -30,6 +30,12 @@ if ! rustup component list --toolchain=nightly | grep "rust-src.*installed" > /d
     { echo 'Installing rust-src failed' ; exit 1; }
 fi
 
+# Source files for rust core, needed to compile our own stdlib
+if ! rustup component list --toolchain=nightly | grep "llvm-tools-preview.*installed" > /dev/null 2>&1 ; then
+  rustup component add llvm-tools-preview --toolchain=nightly ||
+    { echo 'Installing rust-src failed' ; exit 1; }
+fi
+
 # QEMU is required to run the OS in a VM
 if ! qemu-system-x86_64 --version > /dev/null 2>&1 ; then
   echo "Please install qemu: https://www.qemu.org/download/"
