@@ -1,2 +1,2 @@
 [build]
-target = "this-os.json"
+target = "x86_64-os-target.json"
