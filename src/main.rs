@@ -2,8 +2,6 @@
 #![no_std]
 #![no_main]
 
-extern crate bootloader;
-
 use core::intrinsics;
 use core::panic::PanicInfo;
 
@@ -15,5 +13,5 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub fn _start() -> ! {
-    loop {}
+  loop {}
 }
