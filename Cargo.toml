@@ -12,3 +12,6 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+[package.metadata.bootimage]
+run-args = ["-serial", "stdio"]
