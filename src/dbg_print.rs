@@ -31,8 +31,8 @@ impl DebugPrintable for char {
 
 impl DebugPrintable for u64 {
   fn print_debug(&self) {
-    // u64 is at most 20 chars:
-    // 18_446_744_073_709_551_615
+    if *self == 0 { return serial_print_byte(b'0'); }
+    // u64 is at most 20 chars
     let mut buffer = [b'0'; 20];
     let (mut n, mut len) = (*self, 0);
     while n != 0 {

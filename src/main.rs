@@ -37,7 +37,8 @@ pub fn _start() -> ! {
   }
 
   dbg!("Hello ", "world");
-  dbg!("Can now print number! ", 11, ' ', -1337, ' ', i32::MIN);
+  dbg!("Handles numbers: ", 11, ' ', -1337);
+  dbg!("with edge cases: ", 0, ' ', u64::MAX, ' ', i64::MIN);
   dbg!("And characters: ", 'A', 'x', 'O', 'S');
 
   loop {}
