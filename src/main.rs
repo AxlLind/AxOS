@@ -14,7 +14,14 @@ use dbg_print::*;
 
 #[panic_handler]
 #[no_mangle]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+  dbg!("\nKernel panicked!");
+  if let Some(msg) = info.payload().downcast_ref::<&str>() {
+    dbg!("Panic payload: ", msg);
+  }
+  if let Some(l) = info.location() {
+    dbg!("Panic in ", l.file(), ' ', l.line(), ':', l.column());
+  }
   intrinsics::abort()
 }
 
