@@ -1,16 +1,15 @@
-use crate::serial_port::SerialPort;
+use crate::serial_port;
 
 // QEMU accepts debug output on the COM1 serial port
 // Reference: https://wiki.osdev.org/Serial_Ports
 const COM1: u16 = 0x3f8;
-static DEBUG_SERIAL_PORT: SerialPort = SerialPort(COM1);
 
-pub fn init_debug_port() {
-  SerialPort::initialize(COM1);
+pub fn initialize_debug_port() {
+  serial_port::initialize(COM1);
 }
 
 fn serial_print_byte(b: u8) {
-  DEBUG_SERIAL_PORT.send(b);
+  serial_port::send(COM1, b);
 }
 
 pub trait DebugPrintable {

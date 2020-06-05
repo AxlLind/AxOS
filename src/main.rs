@@ -27,7 +27,7 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub fn _start() -> ! {
-  dbg_print::init_debug_port();
+  dbg_print::initialize_debug_port();
   let vga_mem = unsafe { core::slice::from_raw_parts_mut(0xb8000 as *mut u8, 4000) };
 
   let s = b"hello world";
