@@ -5,23 +5,18 @@ use crate::serial_port;
 // Reference: https://wiki.osdev.org/Serial_Ports
 const COM1: u16 = 0x3f8;
 
-pub fn initialize_debug_port() {
-  serial_port::initialize(COM1);
-}
-
-fn serial_print_byte(b: u8) {
-  serial_port::send(COM1, b);
-}
+pub fn initialize() { serial_port::initialize(COM1); }
 
 pub struct DebugPrinter;
 
 impl fmt::Write for DebugPrinter {
   fn write_str(&mut self, s: &str) -> Result<(),fmt::Error> {
-    s.bytes().for_each(serial_print_byte);
+    for b in s.bytes() { serial_port::send(COM1, b); }
     Ok(())
   }
 }
 
+#[allow(unused_macros)]
 macro_rules! dbg_no_ln {
   ($($e:expr),+ $(,)?) => {{
     use core::fmt::Write;
