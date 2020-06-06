@@ -23,10 +23,10 @@ mod serial_port;
 fn panic(info: &PanicInfo) -> ! {
   dbg!("\nKernel panicked!");
   if let Some(msg) = info.payload().downcast_ref::<&str>() {
-    dbg!("Panic payload: ", msg);
+    dbg!("Panic payload: {}", msg);
   }
   if let Some(l) = info.location() {
-    dbg!("Panic in ", l.file(), ' ', l.line(), ':', l.column());
+    dbg!("Panic in {} {}:{}", l.file(), l.line(), l.column());
   }
   intrinsics::abort()
 }
@@ -42,17 +42,10 @@ pub fn _start() -> ! {
     vga_mem[2*i + 1] = 0x02;
   }
 
-  dbg!("Hello ", "world");
-  dbg!("Handles numbers: ", 11, ' ', -1337);
-  dbg!("with edge cases: ", 0, ' ', u64::MAX, ' ', i64::MIN);
-  dbg!("And characters: ", 'A', 'x', 'O', 'S');
-
-  let mut v = Vec::new();
-  v.push(1);
-  let v2 = vec![1,2,3,4,5,5,6,7,8,9,9,2,2,45,1,1];
-
-  dbg!(v[0]);
-  dbg!(v2[10]);
+  dbg!("Hello {}", "world");
+  dbg!("Handles numbers: {} {}", 11, -1337);
+  dbg!("with edge cases: {} {} {}", 0, u64::MAX, i64::MIN);
+  dbg!("And characters: {}{}{}{}", 'A', 'x', 'O', 'S');
 
   loop {}
 }

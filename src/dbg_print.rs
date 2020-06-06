@@ -1,3 +1,4 @@
+use core::fmt;
 use crate::serial_port;
 
 // QEMU accepts debug output on the COM1 serial port
@@ -12,67 +13,25 @@ fn serial_print_byte(b: u8) {
   serial_port::send(COM1, b);
 }
 
-pub trait DebugPrintable {
-  fn print_debug(&self);
-}
+pub struct DebugPrinter;
 
-impl DebugPrintable for str {
-  fn print_debug(&self) {
-    self.bytes().for_each(serial_print_byte);
+impl fmt::Write for DebugPrinter {
+  fn write_str(&mut self, s: &str) -> Result<(),fmt::Error> {
+    s.bytes().for_each(serial_print_byte);
+    Ok(())
   }
 }
-
-impl DebugPrintable for char {
-  fn print_debug(&self) {
-    serial_print_byte(*self as u8);
-  }
-}
-
-impl DebugPrintable for u64 {
-  fn print_debug(&self) {
-    if *self == 0 { return serial_print_byte(b'0'); }
-    // u64 is at most 20 chars
-    let mut buffer = [b'0'; 20];
-    let (mut n, mut len) = (*self, 0);
-    while n != 0 {
-      buffer[len] += (n % 10) as u8;
-      n /= 10;
-      len += 1;
-    }
-    (0..len).rev()
-      .map(|i| buffer[i])
-      .for_each(serial_print_byte);
-  }
-}
-
-impl DebugPrintable for i64 {
-  fn print_debug(&self) {
-    let mut n = *self;
-    if n < 0 {
-      serial_print_byte(b'-');
-      if n != i64::MIN { n = -n; }
-    }
-    (n as u64).print_debug();
-  }
-}
-
-macro_rules! impl_printable_from {
-  ($A:ty, [$($T:ty),+]) => {
-    $(impl DebugPrintable for $T {
-      fn print_debug(&self) { (*self as $A).print_debug(); }
-    })+
-  };
-}
-impl_printable_from!{ u64, [u32, u16, u8, usize] }
-impl_printable_from!{ i64, [i32, i16, i8, isize] }
 
 macro_rules! dbg_no_ln {
   ($($e:expr),+ $(,)?) => {{
-    use $crate::dbg_print::DebugPrintable;
-    $($e.print_debug();)+
+    use core::fmt::Write;
+    write!($crate::dbg_print::DebugPrinter, $($e),+).unwrap();
   }}
 }
 
 macro_rules! dbg {
-  ($($e:expr),+ $(,)?) => { dbg_no_ln!($($e),+,'\n') }
+  ($($e:expr),+ $(,)?) => {{
+    use core::fmt::Write;
+    writeln!($crate::dbg_print::DebugPrinter, $($e),+).unwrap();
+  }}
 }
