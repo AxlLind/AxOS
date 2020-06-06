@@ -68,6 +68,7 @@ impl_printable_from!{ i64, [i32, i16, i8, isize] }
 
 macro_rules! dbg_no_ln {
   ($($e:expr),+ $(,)?) => {{
+    use $crate::dbg_print::DebugPrintable;
     $($e.print_debug();)+
   }}
 }

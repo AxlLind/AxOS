@@ -1,16 +1,22 @@
-#![feature(core_intrinsics)]
-#![feature(asm)]
 #![no_std]
 #![no_main]
+
+#![feature(core_intrinsics)]
+#![feature(asm)]
+#![feature(alloc_error_handler)]
+
+#[macro_use] mod dbg_print;
+
+// import the alloc crate (we are no_std + alloc)
+#[macro_use]
+extern crate alloc;
+use alloc::vec::Vec;
 
 use core::intrinsics;
 use core::panic::PanicInfo;
 
+mod allocation;
 mod serial_port;
-
-#[macro_use]
-mod dbg_print;
-use dbg_print::*;
 
 #[panic_handler]
 #[no_mangle]
@@ -40,6 +46,13 @@ pub fn _start() -> ! {
   dbg!("Handles numbers: ", 11, ' ', -1337);
   dbg!("with edge cases: ", 0, ' ', u64::MAX, ' ', i64::MIN);
   dbg!("And characters: ", 'A', 'x', 'O', 'S');
+
+  let mut v = Vec::new();
+  v.push(1);
+  let v2 = vec![1,2,3,4,5,5,6,7,8,9,9,2,2,45,1,1];
+
+  dbg!(v[0]);
+  dbg!(v2[10]);
 
   loop {}
 }
