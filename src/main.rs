@@ -15,6 +15,7 @@ use core::intrinsics;
 use core::panic::PanicInfo;
 
 mod allocation;
+mod io_port;
 mod serial_port;
 mod vga_device;
 
@@ -45,14 +46,12 @@ fn vga_test() {
 #[no_mangle]
 pub fn _start() -> ! {
   dbg_print::initialize();
-  vga_test();
 
   dbg!("Hello {}", "world");
   dbg!("Handles numbers: {} {}", 11, -1337);
   dbg!("with edge cases: {} {} {}", 0, u64::MAX, i64::MIN);
   dbg!("And characters: {}{}{}{}", 'A', 'x', 'O', 'S');
-  let v = vec![0;1];
-  dbg!("{}", v[0]);
+  vga_test();
 
   loop {}
 }
