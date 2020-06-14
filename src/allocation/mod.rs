@@ -1,5 +1,3 @@
-use core::intrinsics;
-
 mod allocator;
 use allocator::Allocator;
 
@@ -13,5 +11,5 @@ static KERNEL_ALLOCATOR: Allocator = Allocator;
 fn alloc_error(layout: core::alloc::Layout) -> ! {
   dbg!("\nKernel out of memory error!");
   dbg!("Tried to allocate layout: size={} align={}", layout.size(), layout.align());
-  intrinsics::abort()
+  panic!("Kernel OOM");
 }

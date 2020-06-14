@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-#![feature(core_intrinsics)]
 #![feature(asm)]
 #![feature(alloc_error_handler)]
 
@@ -11,7 +10,6 @@
 #[macro_use]
 extern crate alloc;
 
-use core::intrinsics;
 use core::panic::PanicInfo;
 
 mod allocation;
