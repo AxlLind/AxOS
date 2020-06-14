@@ -30,7 +30,7 @@ fn panic(info: &PanicInfo) -> ! {
   if let Some(l) = info.location() {
     dbg!("Panic in {} {}:{}", l.file(), l.line(), l.column());
   }
-  intrinsics::abort()
+  loop {}
 }
 
 #[no_mangle]
