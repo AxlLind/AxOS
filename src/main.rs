@@ -18,6 +18,7 @@ mod allocation;
 mod io_port;
 mod serial_port;
 mod vga_device;
+use vga_device::VgaColor;
 
 #[panic_handler]
 #[no_mangle]
@@ -32,17 +33,6 @@ fn panic(info: &PanicInfo) -> ! {
   intrinsics::abort()
 }
 
-fn vga_test() {
-  let mut vga_device = vga_device::VgaDevice::new();
-  let s = "hello world";
-  for _ in 0..1000 {
-    for b in s.bytes() {
-      vga_device.write_char(b);
-    }
-    for _ in 0..10000 {}
-  }
-}
-
 #[no_mangle]
 pub fn _start() -> ! {
   dbg_print::initialize();
@@ -51,7 +41,9 @@ pub fn _start() -> ! {
   dbg!("Handles numbers: {} {}", 11, -1337);
   dbg!("with edge cases: {} {} {}", 0, u64::MAX, i64::MIN);
   dbg!("And characters: {}{}{}{}", 'A', 'x', 'O', 'S');
-  vga_test();
-
+  let mut vga_device = vga_device::VgaDevice::new();
+  for (i,&c) in b"Hello world".iter().enumerate() {
+    vga_device.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
+  }
   loop {}
 }

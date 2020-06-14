@@ -4,6 +4,8 @@ use core::slice;
 const ROWS: usize = 25;
 const COLS: usize = 80;
 
+#[repr(u8)] // force rust to represent this as we expect
+#[derive(Debug,Clone,Copy)]
 pub enum VgaColor {
   Black = 0x0,
   Blue = 0x1,
@@ -23,44 +25,27 @@ pub enum VgaColor {
   White = 0xF,
 }
 
+#[repr(C)] // force rust to represent this as we expect
+#[derive(Debug,Clone,Copy)]
+struct VgaChar { c: u8, color: u8 }
+
+type Buffer = [[VgaChar; COLS]; ROWS];
+
 pub struct VgaDevice {
-  mem: &'static mut [u8],
+  mem: &'static mut Buffer,
   row: usize,
   col: usize,
 }
 
 impl VgaDevice {
   pub fn new() -> Self {
-    let mem = unsafe {
-      slice::from_raw_parts_mut(0xb8000 as *mut u8, 4000)
-    };
-    for i in 0..4000 { mem[i] = 0; }
+    // Map the range 0xb8000-0xb8FA0 directly as a 25x80 2d array.
+    let mem = unsafe { &mut *(0xb8000 as *mut Buffer) };
     Self { mem, row: 0, col: 0 }
   }
 
-  pub fn write_char(&mut self, c: u8) {
-    let idx = self.row * COLS + self.col;
-    self.mem[idx * 2] = c;
-    self.mem[idx * 2 + 1] = VgaColor::Green as u8;
-    self.col += 1;
-    if self.col == COLS {
-      self.col = 0;
-      self.row += 1;
-      if self.row == ROWS {
-        self.scroll();
-      }
-    }
-  }
-
-  pub fn scroll(&mut self) {
-    let offset = COLS * 2;
-    let size = 4000 - offset;
-    for i in 0..size {
-      self.mem[i] = self.mem[i + offset];
-    }
-    for i in 0..offset {
-      self.mem[size + i] = 0;
-    }
-    self.row -= 1;
+  pub fn write_char(&mut self, row: usize, col: usize, c: u8, text_color: VgaColor, background_color: VgaColor) {
+    let color = text_color as u8 | (background_color as u8) << 4;
+    self.mem[row][col] = VgaChar { c, color };
   }
 }
