@@ -1,10 +1,6 @@
 use core::mem::size_of;
-
-fn current_cs() -> u16 {
-  let segment;
-  unsafe { asm!("mov {:x}, cs", out(reg) segment); }
-  segment
-}
+use super::DescriptorTablePtr;
+use super::gdt::current_cs;
 
 // Reference: https://wiki.osdev.org/Interrupt_Descriptor_Table#IDT_in_IA-32e_Mode_.2864-bit_IDT.29
 #[derive(Clone,Copy)]
@@ -43,13 +39,10 @@ impl InterruptDescriptorTable {
   }
 
   pub fn load(&'static self) {
-    #[repr(packed)]
-    struct IdtPtr(u16,u64);
-
-    let ptr = IdtPtr(
-      size_of::<Self>() as u16 - 1,
-      self as *const _ as u64,
-    );
+    let ptr = DescriptorTablePtr {
+      size: size_of::<Self>() as u16 - 1,
+      base_ptr: self as *const _ as u64,
+    };
     unsafe { asm!("lidt [{}]", in(reg) &ptr); }
   }
 }
