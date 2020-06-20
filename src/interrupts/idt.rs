@@ -1,9 +1,8 @@
 use core::mem::size_of;
 
-// get the current code segment
-fn get_cs() -> u16 {
-  let segment: u16;
-  unsafe { asm!("mov ax, cs", out("ax") segment); }
+fn current_cs() -> u16 {
+  let segment;
+  unsafe { asm!("mov {:x}, cs", out(reg) segment); }
   segment
 }
 
@@ -16,11 +15,8 @@ struct IdtEntry {
   options: u16,
   ptr_mid: u16,
   ptr_high: u32,
-  _reserved: u32,
+  reserved: u32,
 }
-
-#[repr(C, packed)]
-struct IdtPtr { size: u16, idt_ptr: u64 }
 
 #[repr(C)]
 pub struct InterruptDescriptorTable([IdtEntry; 256]);
@@ -33,13 +29,13 @@ impl InterruptDescriptorTable {
       options: 0xe00,
       ptr_mid: 0,
       ptr_high: 0,
-      _reserved: 0,
+      reserved: 0,
     };
     Self([unimplemented_entry; 256])
   }
 
   pub fn set_handler(&mut self, i: usize, fn_ptr: u64) {
-    self.0[i].gdt_selector = get_cs();
+    self.0[i].gdt_selector = current_cs();
     self.0[i].ptr_low = fn_ptr as u16;
     self.0[i].ptr_mid = (fn_ptr >> 16) as u16;
     self.0[i].ptr_high = (fn_ptr >> 32) as u32;
@@ -47,10 +43,13 @@ impl InterruptDescriptorTable {
   }
 
   pub fn load(&'static self) {
-    let ptr = IdtPtr {
-      size: size_of::<Self>() as u16 - 1,
-      idt_ptr: self as *const _ as u64,
-    };
+    #[repr(packed)]
+    struct IdtPtr(u16,u64);
+
+    let ptr = IdtPtr(
+      size_of::<Self>() as u16 - 1,
+      self as *const _ as u64,
+    );
     unsafe { asm!("lidt [{}]", in(reg) &ptr); }
   }
 }
