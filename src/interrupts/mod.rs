@@ -64,8 +64,8 @@ lazy_static! {
 lazy_static! {
   static ref IDT: InterruptDescriptorTable = {
     let mut idt = InterruptDescriptorTable::new();
-    idt.set_handler(3, breakpoint_handler as u64);
-    idt.set_handler(8, double_fault_handler as u64);
+    idt[3].set_handler(breakpoint_handler as u64);
+    idt[8].set_handler(double_fault_handler as u64);
     idt
   };
 }
