@@ -2,35 +2,39 @@ use core::mem::size_of;
 use super::DescriptorTablePtr;
 
 // Reference: https://wiki.osdev.org/TSS
-#[derive(Debug,Clone,Copy,Default)]
+#[derive(Clone,Copy)]
 #[repr(C,packed)]
 pub struct TaskSegmentSelector {
   reserved1: u32,
-  rsp: [(u32,u32); 3],
+  rsp: [u64; 3],
   reserved2: u64,
-  ist: [(u32,u32); 7],
+  ist: [u64; 7],
   reserved3: u64,
-  iopb_offset: u32,
+  reserved4: u16,
+  io_base_ptr: u16,
 }
 
 impl TaskSegmentSelector {
   pub fn new() -> Self {
     assert_eq!(size_of::<Self>(), 104);
-    Self::default()
+    Self {
+      rsp: [0; 3],
+      ist: [0; 7],
+      io_base_ptr: 0,
+      reserved1: 0,
+      reserved2: 0,
+      reserved3: 0,
+      reserved4: 0,
+    }
   }
 
-  pub fn set_interrupt_stack(&mut self, i: usize, stack_ptr: u64) {
-    let ptr_low = stack_ptr as u32;
-    let ptr_high = (stack_ptr >> 32) as u32;
-    self.ist[i-1] = (ptr_low, ptr_high);
-  }
-
-  pub fn _print(&self) {
-    dbg!("{:#x?}", self);
+  pub fn set_interrupt_stack(&mut self, i: usize, stack: &'static [u8]) {
+    let stack_ptr = stack.as_ptr() as u64;
+    let stack_size = stack.len() as u64;
+    self.ist[i-1] = stack_ptr + stack_size;
   }
 }
 
-#[derive(Debug)]
 #[repr(C)]
 pub struct GlobalDescriptorTable {
   entries: [u64; 8],
@@ -71,16 +75,16 @@ pub fn kernel_code_segment() -> u64 {
 
 pub fn null_segment() -> u64 { 0 }
 
-// The layout of the TSS descriptor is messy. See section 6.2.3 of
-// https://www.intel.com/content/dam/support/us/en/documents/processors/pentium4/sb/25366821.pdf
-pub fn tss_segment(tss: &TaskSegmentSelector) -> (u64,u64) {
+// The layout of the TSS descriptor is a bit messy.
+// See section 6.2.3 of https://www.intel.com/content/dam/support/us/en/documents/processors/pentium4/sb/25366821.pdf
+pub fn tss_segment(tss: &'static TaskSegmentSelector) -> (u64,u64) {
   let tss_ptr = tss as *const _ as u64;
   let ptr_low = tss_ptr & 0xffffff;     // 0:23
   let ptr_mid = (tss_ptr >> 24) & 0xff; // 24:31
   let ptr_high = tss_ptr >> 32;         // 32:63
-  let mut segment_low = size_of::<TaskSegmentSelector>() as u64;
+  let mut segment_low = size_of::<TaskSegmentSelector>() as u64 - 1;
   segment_low |= (ptr_low) << 16;
-  segment_low |= 0x89 << 40; // type
+  segment_low |= 0b1001 << 40; // type 64-bit TSS (available)
   segment_low |= PRESENT;
   segment_low |= ptr_mid << 56;
   (segment_low, ptr_high)
@@ -97,13 +101,16 @@ pub fn current_cs() -> u16 {
 // a return address on the stack and do a 'far return'.
 // Unsafe since the caller has to provide a valid index.
 pub unsafe fn set_cs(segment_index: u16) {
-  let cs = segment_index << 3;
   asm!("
     push {}
     lea rax, 1f
     push rax
     retfq
     1:",
-    in(reg) cs as u64,
+    in(reg) segment_index as u64,
   )
+}
+
+pub unsafe fn load_tss(segment_index: u16) {
+  asm!("ltr {:x}", in(reg) segment_index);
 }

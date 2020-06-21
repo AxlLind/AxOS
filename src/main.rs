@@ -35,6 +35,11 @@ fn panic(info: &PanicInfo) -> ! {
   loop {}
 }
 
+#[allow(unconditional_recursion)]
+fn stack_overflow() {
+  stack_overflow();
+}
+
 #[no_mangle]
 pub fn _start() -> ! {
   dbg_print::initialize();
@@ -44,9 +49,6 @@ pub fn _start() -> ! {
   for (i,&c) in b"Hello world".iter().enumerate() {
     vga_device.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
   }
-  dbg!("Here we go");
-
-  // trigger a breakpoint interrupt
-  unsafe { asm!("int 3"); }
+  stack_overflow();
   loop {}
 }

@@ -42,9 +42,8 @@ lazy_static! {
   static ref TSS: TaskSegmentSelector = {
     let mut tss = TaskSegmentSelector::new();
     // TODO: Allocate this memory instead
-    static INTERRUPT_STACK: [u8; 4096] = [0; 4096];
-    let stack_ptr = INTERRUPT_STACK.as_ptr() as u64;
-    tss.set_interrupt_stack(1, stack_ptr);
+    static mut INTERRUPT_STACK: [u8; 4096] = [0; 4096];
+    tss.set_interrupt_stack(1, unsafe { &INTERRUPT_STACK });
     tss
   };
 }
@@ -65,14 +64,15 @@ lazy_static! {
   static ref IDT: InterruptDescriptorTable = {
     let mut idt = InterruptDescriptorTable::new();
     idt[3].set_handler(breakpoint_handler as u64);
-    idt[8].set_handler(double_fault_handler as u64);
+    idt[8].set_handler(double_fault_handler as u64).with_ist(1);
     idt
   };
 }
 
 pub fn initialize() {
   GDT.load();
-  // safe, we know this is a valid code segment index
-  unsafe { gdt::set_cs(1); }
+  // safe, we know these are valid indexes into the GDT
+  unsafe { gdt::set_cs(8); }
+  unsafe { gdt::load_tss(16); }
   IDT.load();
 }

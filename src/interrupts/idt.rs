@@ -16,12 +16,17 @@ pub struct IdtEntry {
 }
 
 impl IdtEntry {
-  pub fn set_handler(&mut self, fn_ptr: u64) {
+  pub fn set_handler(&mut self, fn_ptr: u64) -> &mut Self {
     self.gdt_selector = current_cs();
     self.ptr_low = fn_ptr as u16;
     self.ptr_mid = (fn_ptr >> 16) as u16;
     self.ptr_high = (fn_ptr >> 32) as u32;
     self.options |= 1 << 15;
+    self
+  }
+
+  pub fn with_ist(&mut self, stack_index: u16) {
+    self.options |= stack_index;
   }
 }
 
