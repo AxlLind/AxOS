@@ -1,9 +1,9 @@
 mod idt;
 use idt::InterruptDescriptorTable;
 mod gdt;
-use gdt::GlobalDescriptorTable;
+use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
 
-// Used to load both the IDT and GDT tables
+// Used to load the IDT and GDT tables
 #[repr(packed)]
 #[allow(unused)]
 struct DescriptorTablePtr {
@@ -32,18 +32,31 @@ extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
   loop {}
 }
 
-extern "x86-interrupt" fn double_fault_handler(frame: &mut InterruptStackFrame, err_code: u64) -> ! {
+extern "x86-interrupt" fn double_fault_handler(frame: &mut InterruptStackFrame, _err_code: u64) -> ! {
   dbg!("double fault interrupt!");
   dbg!("{:x?}", frame);
-  dbg!("err code {}", err_code);
   loop {}
+}
+
+lazy_static! {
+  static ref TSS: TaskSegmentSelector = {
+    let mut tss = TaskSegmentSelector::new();
+    // TODO: Allocate this memory instead
+    static INTERRUPT_STACK: [u8; 4096] = [0; 4096];
+    let stack_ptr = INTERRUPT_STACK.as_ptr() as u64;
+    tss.set_interrupt_stack(1, stack_ptr);
+    tss
+  };
 }
 
 lazy_static! {
   static ref GDT: GlobalDescriptorTable = {
     let mut gdt = GlobalDescriptorTable::new();
+    let tss_segment = gdt::tss_segment(&TSS);
     gdt.push(gdt::null_segment());
     gdt.push(gdt::kernel_code_segment());
+    gdt.push(tss_segment.0);
+    gdt.push(tss_segment.1);
     gdt
   };
 }
@@ -59,7 +72,7 @@ lazy_static! {
 
 pub fn initialize() {
   GDT.load();
-  // safe since we know 1 is a valid code segment index
+  // safe, we know this is a valid code segment index
   unsafe { gdt::set_cs(1); }
   IDT.load();
 }

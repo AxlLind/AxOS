@@ -38,6 +38,7 @@ impl InterruptDescriptorTable {
     self.0[i].options |= 1 << 15;
   }
 
+  // Safe since the IDT is static
   pub fn load(&'static self) {
     let ptr = DescriptorTablePtr {
       size: size_of::<Self>() as u16 - 1,
