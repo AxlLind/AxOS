@@ -1,4 +1,3 @@
-use core::mem::size_of;
 use core::ops::{Index, IndexMut};
 use super::DescriptorTablePtr;
 use super::gdt::current_cs;
@@ -48,10 +47,7 @@ impl InterruptDescriptorTable {
 
   // Safe since the IDT is static
   pub fn load(&'static self) {
-    let ptr = DescriptorTablePtr {
-      size: size_of::<Self>() as u16 - 1,
-      base_ptr: self as *const _ as u64,
-    };
+    let ptr = DescriptorTablePtr::ptr_to(self);
     unsafe { asm!("lidt [{}]", in(reg) &ptr); }
   }
 }

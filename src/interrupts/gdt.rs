@@ -1,4 +1,5 @@
 use core::mem::size_of;
+use core::ops::{Index, IndexMut};
 use super::DescriptorTablePtr;
 
 // Reference: https://wiki.osdev.org/TSS
@@ -16,7 +17,6 @@ pub struct TaskSegmentSelector {
 
 impl TaskSegmentSelector {
   pub fn new() -> Self {
-    assert_eq!(size_of::<Self>(), 104);
     Self {
       rsp: [0; 3],
       ist: [0; 7],
@@ -36,32 +36,26 @@ impl TaskSegmentSelector {
 }
 
 #[repr(C)]
-pub struct GlobalDescriptorTable {
-  entries: [u64; 8],
-  size: usize,
-}
+pub struct GlobalDescriptorTable([u64; 4]);
 
 impl GlobalDescriptorTable {
-  pub fn new() -> Self {
-    Self {
-      entries: [0; 8],
-      size: 0,
-    }
-  }
-
-  pub fn push(&mut self, segment: u64) {
-    self.entries[self.size] = segment;
-    self.size += 1;
-  }
+  pub fn new() -> Self { Self([0; 4]) }
 
   // Safe since the GDT is static
   pub fn load(&'static self) {
-    let ptr = DescriptorTablePtr {
-      size: self.size as u16 * size_of::<u64>() as u16 - 1,
-      base_ptr: self.entries.as_ptr() as u64,
-    };
+    let ptr = DescriptorTablePtr::ptr_to(self);
     unsafe { asm!("lgdt [{}]", in(reg) &ptr); }
   }
+}
+
+impl Index<usize> for GlobalDescriptorTable {
+  type Output = u64;
+
+  fn index(&self, i: usize) -> &Self::Output { &self.0[i] }
+}
+
+impl IndexMut<usize> for GlobalDescriptorTable {
+  fn index_mut(&mut self, i: usize) -> &mut Self::Output { &mut self.0[i] }
 }
 
 const EXECUTABLE:   u64 = 1 << 43; // Must be set for code segments.

@@ -1,3 +1,5 @@
+use core::mem::size_of;
+
 mod idt;
 use idt::InterruptDescriptorTable;
 mod gdt;
@@ -6,9 +8,14 @@ use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
 // Used to load the IDT and GDT tables
 #[repr(packed)]
 #[allow(unused)]
-struct DescriptorTablePtr {
-  size: u16,
-  base_ptr: u64,
+struct DescriptorTablePtr(u16,u64);
+
+impl DescriptorTablePtr {
+  fn ptr_to<T>(t: &T) -> Self {
+    let size = size_of::<T>() as u16 - 1;
+    let ptr = t as *const _ as u64;
+    Self(size, ptr)
+  }
 }
 
 // Pushed on the stack by the CPU before calling the interrupt handler
@@ -52,10 +59,10 @@ lazy_static! {
   static ref GDT: GlobalDescriptorTable = {
     let mut gdt = GlobalDescriptorTable::new();
     let tss_segment = gdt::tss_segment(&TSS);
-    gdt.push(gdt::null_segment());
-    gdt.push(gdt::kernel_code_segment());
-    gdt.push(tss_segment.0);
-    gdt.push(tss_segment.1);
+    gdt[0] = gdt::null_segment();
+    gdt[1] = gdt::kernel_code_segment();
+    gdt[2] = tss_segment.0;
+    gdt[3] = tss_segment.1;
     gdt
   };
 }
