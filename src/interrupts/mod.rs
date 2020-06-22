@@ -7,7 +7,6 @@ use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
 
 // Used to load the IDT and GDT tables
 #[repr(packed)]
-#[allow(unused)]
 struct DescriptorTablePtr(u16,u64);
 
 impl DescriptorTablePtr {
@@ -23,7 +22,7 @@ impl DescriptorTablePtr {
 // References:
 // https://os.phil-opp.com/cpu-exceptions/#the-interrupt-stack-frame
 // https://wiki.osdev.org/Exceptions
-#[derive(Debug,Clone)]
+#[derive(Debug)]
 #[repr(C)]
 struct InterruptStackFrame {
   instruction_ptr: u64,
@@ -53,9 +52,7 @@ lazy_static! {
     tss.set_interrupt_stack(1, unsafe { &INTERRUPT_STACK });
     tss
   };
-}
 
-lazy_static! {
   static ref GDT: GlobalDescriptorTable = {
     let mut gdt = GlobalDescriptorTable::new();
     let tss_segment = gdt::tss_segment(&TSS);
@@ -65,9 +62,7 @@ lazy_static! {
     gdt[3] = tss_segment.1;
     gdt
   };
-}
 
-lazy_static! {
   static ref IDT: InterruptDescriptorTable = {
     let mut idt = InterruptDescriptorTable::new();
     idt[3].set_handler(breakpoint_handler as u64);

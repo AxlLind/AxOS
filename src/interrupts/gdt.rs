@@ -3,7 +3,6 @@ use core::ops::{Index, IndexMut};
 use super::DescriptorTablePtr;
 
 // Reference: https://wiki.osdev.org/TSS
-#[derive(Clone,Copy)]
 #[repr(C,packed)]
 pub struct TaskSegmentSelector {
   reserved1: u32,
