@@ -14,7 +14,7 @@ struct AllocatorImpl { current: *mut u8 }
 impl AllocatorImpl {
   unsafe fn alloc(&mut self, layout: Layout) -> *mut u8 {
     let res = self.current;
-    self.current = self.current.offset(layout.size() as isize);
+    self.current = self.current.add(layout.size());
     if (self.current as usize) >= KERNEL_END_ADR {
       return null_mut();
     }
