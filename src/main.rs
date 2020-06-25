@@ -16,7 +16,7 @@ extern crate lazy_static;
 use core::panic::PanicInfo;
 
 mod allocation;
-mod io_port;
+mod io;
 mod serial_port;
 mod vga_device;
 mod interrupts;
