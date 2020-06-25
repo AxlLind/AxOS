@@ -4,6 +4,7 @@ mod idt;
 use idt::InterruptDescriptorTable;
 mod gdt;
 use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
+mod pic;
 
 // Used to load the IDT and GDT tables
 #[repr(packed)]
@@ -38,6 +39,11 @@ extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
   loop {}
 }
 
+extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
+  dbg_no_ln!(".");
+  unsafe { pic::end_of_interrupt(0); }
+}
+
 extern "x86-interrupt" fn double_fault_handler(frame: &mut InterruptStackFrame, _err_code: u64) -> ! {
   dbg!("double fault interrupt!");
   dbg!("{:x?}", frame);
@@ -65,8 +71,9 @@ lazy_static! {
 
   static ref IDT: InterruptDescriptorTable = {
     let mut idt = InterruptDescriptorTable::new();
-    idt[3].set_handler(breakpoint_handler as u64);
-    idt[8].set_handler(double_fault_handler as u64).with_ist(1);
+    idt[0x03].set_handler(breakpoint_handler as u64);
+    idt[0x08].set_handler(double_fault_handler as u64).with_ist(1);
+    idt[0x20].set_handler(timer_handler as u64);
     idt
   };
 }
@@ -77,4 +84,6 @@ pub fn initialize() {
   unsafe { gdt::set_cs(8); }
   unsafe { gdt::load_tss(16); }
   IDT.load();
+  pic::initialize();
+  unsafe { asm!("sti"); }
 }
