@@ -1,15 +1,12 @@
 #!/bin/sh
 set -e
 
-rust_files=$(git diff --name-only --cached --diff-filter=d "*.rs")
-echo "Checks on $([$rust_files == ""] && echo "nothing" || $rust_files).."
-
 echo "Running rustfmt.."
-cargo fmt -- --check $rust_files
+cargo fmt -- --check
 
 echo "Running clippy.."
 touch src/main.rs # force recompilation
-cargo xclippy -- -D warnings $rust_files
+cargo xclippy -- -D warnings
 
 echo "Running tests.."
 cargo xtest 2> /dev/null | rg --invert-match "(Building bootloader|Running: \`qemu)"
