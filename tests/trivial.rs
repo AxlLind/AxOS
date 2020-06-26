@@ -7,4 +7,6 @@
 ax_os::test_prelude!();
 
 #[test_case]
-fn basic_test() {}
+fn trivial_test() {
+  assert_eq!(1, 1);
+}

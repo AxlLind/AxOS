@@ -54,11 +54,6 @@ where
 }
 
 pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
-  match tests.len() {
-    0 => {}
-    1 => dbg!("Running 1 test"),
-    i => dbg!("Running {} tests", i),
-  }
   for test in tests {
     test.run();
   }
@@ -73,10 +68,11 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 
 #[macro_export]
 macro_rules! test_prelude {
-  () => {
+  ($init:expr) => {
     #[cfg(test)]
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
+      $init();
       test_main();
       $crate::hlt_loop();
     }
@@ -86,6 +82,9 @@ macro_rules! test_prelude {
     fn panic(info: &core::panic::PanicInfo) -> ! {
       $crate::test_panic_handler(info);
     }
+  };
+  () => {
+    $crate::test_prelude!((|| {}));
   };
 }
 
