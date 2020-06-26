@@ -17,6 +17,7 @@ impl fmt::Write for DebugPrinter {
 }
 
 #[allow(unused_macros)]
+#[macro_export]
 macro_rules! dbg_no_ln {
   ($($e:expr),+ $(,)?) => {{
     use core::fmt::Write;
@@ -24,6 +25,7 @@ macro_rules! dbg_no_ln {
   }}
 }
 
+#[macro_export]
 macro_rules! dbg {
   ($($e:expr),+ $(,)?) => {{
     use core::fmt::Write;
