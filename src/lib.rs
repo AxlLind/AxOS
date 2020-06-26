@@ -14,14 +14,25 @@ pub mod dbg_print;
 mod io;
 mod serial_port;
 
+pub fn hlt_loop() -> ! {
+  loop {
+    unsafe { asm!("hlt"); }
+  }
+}
+
+pub fn hang() -> ! {
+  unsafe { asm!("cli; hlt"); }
+  unreachable!();
+}
+
 pub fn qemu_exit_success() -> ! {
   io::send(0xf4, 0x10);
-  loop {}
+  hang();
 }
 
 pub fn qemu_exit_failure() -> ! {
   io::send(0xf4, 0x11);
-  loop {}
+  hang();
 }
 
 pub trait TestCase {
@@ -61,7 +72,7 @@ macro_rules! test_prelude {
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
       test_main();
-      loop {}
+      $crate::hlt_loop();
     }
 
     #[cfg(test)]

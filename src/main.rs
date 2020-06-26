@@ -27,7 +27,7 @@ use vga_device::VgaColor;
 fn panic(info: &PanicInfo) -> ! {
   dbg!("Kernel panicked!");
   dbg!("Error: {}", info);
-  loop {}
+  ax_os::hang();
 }
 
 #[cfg(test)]
@@ -48,7 +48,5 @@ pub fn _start() -> ! {
   for (i,&c) in b"Hello world".iter().enumerate() {
     vga_device.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
   }
-  loop {
-    unsafe { asm!("hlt"); }
-  }
+  ax_os::hlt_loop();
 }

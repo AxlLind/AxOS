@@ -37,7 +37,7 @@ struct InterruptStackFrame {
 extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
   dbg!("breakpoint interrupt!");
   dbg!("{:x?}", frame);
-  loop {}
+  ax_os::hang();
 }
 
 extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
@@ -48,7 +48,7 @@ extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
 extern "x86-interrupt" fn double_fault_handler(frame: &mut InterruptStackFrame, _err_code: u64) -> ! {
   dbg!("double fault interrupt!");
   dbg!("{:x?}", frame);
-  loop {}
+  ax_os::hang();
 }
 
 lazy_static! {
