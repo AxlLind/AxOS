@@ -26,12 +26,7 @@ use vga_device::VgaColor;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
   dbg!("Kernel panicked!");
-  if let Some(msg) = info.payload().downcast_ref::<&str>() {
-    dbg!("Panic payload: {}", msg);
-  }
-  if let Some(l) = info.location() {
-    dbg!("Panic in {} {}:{}", l.file(), l.line(), l.column());
-  }
+  dbg!("Error: {}", info);
   loop {}
 }
 
