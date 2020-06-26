@@ -1,8 +1,17 @@
 #! /bin/bash
 
+# use the custom githooks
+git config core.hooksPath .githooks
+
 # General rust toolchains are needed
 if ! rustup --version > /dev/null 2>&1 ; then
   curl https://sh.rustup.rs -sSf | sh ||
+    { echo 'Installing rustup failed' ; exit 1; }
+fi
+
+# Used by some custom scripts
+if ! rg --version > /dev/null 2>&1 ; then
+  cargo install ripgrep ||
     { echo 'Installing rustup failed' ; exit 1; }
 fi
 
