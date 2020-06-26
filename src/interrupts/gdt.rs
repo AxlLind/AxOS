@@ -105,14 +105,14 @@ pub fn current_cs() -> u16 {
 // register. We need to push the new cs value and
 // a return address on the stack and do a 'far return'.
 // Unsafe since the caller has to provide a valid index.
-pub unsafe fn set_cs(segment_index: u16) {
+pub unsafe fn set_cs(segment_index: u64) {
   asm!("
     push {}
     lea rax, 1f
     push rax
     retfq
     1:",
-    in(reg) segment_index as u64,
+    in(reg) segment_index,
   )
 }
 

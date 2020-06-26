@@ -61,8 +61,8 @@ pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
 }
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
-  dbg!("[failed]\n");
-  dbg!("Error: {}\n", info);
+  dbg!("[failed]");
+  dbg!("Error: {}", info);
   qemu_exit_failure();
 }
 

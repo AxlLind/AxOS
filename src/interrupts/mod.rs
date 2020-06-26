@@ -86,11 +86,8 @@ lazy_static! {
 
 pub fn initialize() {
   GDT.load();
-  // safe, we know these are valid indexes into the GDT
   unsafe {
     gdt::set_cs(8);
-  }
-  unsafe {
     gdt::load_tss(16);
   }
   IDT.load();
