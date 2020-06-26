@@ -1,4 +1,5 @@
 use core::mem::size_of;
+use lazy_static::lazy_static;
 
 mod idt;
 use idt::InterruptDescriptorTable;

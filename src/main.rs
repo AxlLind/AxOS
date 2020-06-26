@@ -10,8 +10,6 @@
 #![reexport_test_harness_main = "test_main"]
 
 extern crate alloc;
-#[macro_use]
-extern crate lazy_static;
 
 use core::panic::PanicInfo;
 
