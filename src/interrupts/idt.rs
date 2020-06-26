@@ -6,17 +6,17 @@ use core::ops::{Index, IndexMut};
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct IdtEntry {
-  ptr_low: u16,
-  gdt_selector: u16,
-  options: u16,
-  ptr_mid: u16,
+  ptr_low:  u16,
+  selector: u16,
+  options:  u16,
+  ptr_mid:  u16,
   ptr_high: u32,
   reserved: u32,
 }
 
 impl IdtEntry {
   pub fn set_handler(&mut self, fn_ptr: usize) -> &mut Self {
-    self.gdt_selector = current_cs();
+    self.selector = current_cs();
     self.ptr_low = fn_ptr as u16;
     self.ptr_mid = (fn_ptr >> 16) as u16;
     self.ptr_high = (fn_ptr >> 32) as u32;
@@ -35,10 +35,10 @@ pub struct InterruptDescriptorTable([IdtEntry; 256]);
 impl InterruptDescriptorTable {
   pub fn new() -> Self {
     let unimplemented_entry = IdtEntry {
-      ptr_low: 0,
-      gdt_selector: 0,
-      options: 0xe00,
-      ptr_mid: 0,
+      ptr_low:  0,
+      selector: 0,
+      options:  0xe00,
+      ptr_mid:  0,
       ptr_high: 0,
       reserved: 0,
     };

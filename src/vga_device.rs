@@ -28,7 +28,7 @@ pub enum VgaColor {
 #[repr(C)] // force rust to represent this as we expect
 #[derive(Debug, Clone, Copy)]
 struct VgaChar {
-  c: u8,
+  c:     u8,
   color: u8,
 }
 
