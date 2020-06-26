@@ -1,9 +1,9 @@
-use core::ops::{Index, IndexMut};
-use super::DescriptorTablePtr;
 use super::gdt::current_cs;
+use super::DescriptorTablePtr;
+use core::ops::{Index, IndexMut};
 
 // Reference: https://wiki.osdev.org/Interrupt_Descriptor_Table#IDT_in_IA-32e_Mode_.2864-bit_IDT.29
-#[derive(Clone,Copy)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub struct IdtEntry {
   ptr_low: u16,
@@ -48,16 +48,22 @@ impl InterruptDescriptorTable {
   // Safe since the IDT is static
   pub fn load(&'static self) {
     let ptr = DescriptorTablePtr::ptr_to(self);
-    unsafe { asm!("lidt [{}]", in(reg) &ptr); }
+    unsafe {
+      asm!("lidt [{}]", in(reg) &ptr);
+    }
   }
 }
 
 impl Index<usize> for InterruptDescriptorTable {
   type Output = IdtEntry;
 
-  fn index(&self, i: usize) -> &Self::Output { &self.0[i] }
+  fn index(&self, i: usize) -> &Self::Output {
+    &self.0[i]
+  }
 }
 
 impl IndexMut<usize> for InterruptDescriptorTable {
-  fn index_mut(&mut self, i: usize) -> &mut Self::Output { &mut self.0[i] }
+  fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+    &mut self.0[i]
+  }
 }

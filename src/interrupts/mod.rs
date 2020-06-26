@@ -9,7 +9,7 @@ mod pic;
 
 // Used to load the IDT and GDT tables
 #[repr(packed)]
-struct DescriptorTablePtr(u16,u64);
+struct DescriptorTablePtr(u16, u64);
 
 impl DescriptorTablePtr {
   fn ptr_to<T>(t: &T) -> Self {
@@ -42,10 +42,15 @@ extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
 
 extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
   dbg_no_ln!(".");
-  unsafe { pic::end_of_interrupt(0); }
+  unsafe {
+    pic::end_of_interrupt(0);
+  }
 }
 
-extern "x86-interrupt" fn double_fault_handler(frame: &mut InterruptStackFrame, _err_code: u64) -> ! {
+extern "x86-interrupt" fn double_fault_handler(
+  frame: &mut InterruptStackFrame,
+  _err_code: u64,
+) -> ! {
   dbg!("double fault interrupt!");
   dbg!("{:x?}", frame);
   ax_os::hang();
@@ -82,9 +87,15 @@ lazy_static! {
 pub fn initialize() {
   GDT.load();
   // safe, we know these are valid indexes into the GDT
-  unsafe { gdt::set_cs(8); }
-  unsafe { gdt::load_tss(16); }
+  unsafe {
+    gdt::set_cs(8);
+  }
+  unsafe {
+    gdt::load_tss(16);
+  }
   IDT.load();
   pic::initialize();
-  unsafe { asm!("sti"); }
+  unsafe {
+    asm!("sti");
+  }
 }

@@ -6,7 +6,9 @@ const MB: usize = 0x100000;
 const KERNEL_START_ADR: usize = 0x2000;
 const KERNEL_END_ADR: usize = KERNEL_START_ADR + 4 * MB;
 
-struct AllocatorImpl { current: *mut u8 }
+struct AllocatorImpl {
+  current: *mut u8,
+}
 
 // Very stupid allocator TM.
 // Just forwards the pointer, never freeing memory.
@@ -22,11 +24,15 @@ impl AllocatorImpl {
   }
 }
 
-static mut KERNEL_ALLOCATOR: AllocatorImpl = AllocatorImpl { current: KERNEL_START_ADR as *mut u8 };
+static mut KERNEL_ALLOCATOR: AllocatorImpl = AllocatorImpl {
+  current: KERNEL_START_ADR as *mut u8,
+};
 
 pub struct Allocator;
 
 unsafe impl GlobalAlloc for Allocator {
-  unsafe fn alloc(&self, layout: Layout) -> *mut u8 { KERNEL_ALLOCATOR.alloc(layout) }
+  unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+    KERNEL_ALLOCATOR.alloc(layout)
+  }
   unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {}
 }

@@ -1,11 +1,9 @@
 #![no_std]
 #![no_main]
-
 #![feature(abi_x86_interrupt)]
 #![feature(asm)]
 #![feature(alloc_error_handler)]
 #![feature(custom_test_frameworks)]
-
 #![test_runner(ax_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
@@ -16,10 +14,10 @@ use core::panic::PanicInfo;
 #[macro_use]
 mod dbg_print;
 mod allocation;
+mod interrupts;
 mod io;
 mod serial_port;
 mod vga_device;
-mod interrupts;
 use vga_device::VgaColor;
 
 #[cfg(not(test))]
@@ -45,7 +43,7 @@ pub fn _start() -> ! {
   test_main();
 
   let mut vga_device = vga_device::VgaDevice::new();
-  for (i,&c) in b"Hello world".iter().enumerate() {
+  for (i, &c) in b"Hello world".iter().enumerate() {
     vga_device.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
   }
   ax_os::hlt_loop();

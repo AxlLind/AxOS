@@ -1,9 +1,9 @@
+use super::DescriptorTablePtr;
 use core::mem::size_of;
 use core::ops::{Index, IndexMut};
-use super::DescriptorTablePtr;
 
 // Reference: https://wiki.osdev.org/TSS
-#[repr(C,packed)]
+#[repr(C, packed)]
 pub struct TaskSegmentSelector {
   reserved1: u32,
   rsp: [u64; 3],
@@ -30,7 +30,7 @@ impl TaskSegmentSelector {
   pub fn set_interrupt_stack(&mut self, i: usize, stack: &'static [u8]) {
     let stack_ptr = stack.as_ptr() as u64;
     let stack_size = stack.len() as u64;
-    self.ist[i-1] = stack_ptr + stack_size;
+    self.ist[i - 1] = stack_ptr + stack_size;
   }
 }
 
@@ -38,43 +38,53 @@ impl TaskSegmentSelector {
 pub struct GlobalDescriptorTable([u64; 4]);
 
 impl GlobalDescriptorTable {
-  pub fn new() -> Self { Self([0; 4]) }
+  pub fn new() -> Self {
+    Self([0; 4])
+  }
 
   // Safe since the GDT is static
   pub fn load(&'static self) {
     let ptr = DescriptorTablePtr::ptr_to(self);
-    unsafe { asm!("lgdt [{}]", in(reg) &ptr); }
+    unsafe {
+      asm!("lgdt [{}]", in(reg) &ptr);
+    }
   }
 }
 
 impl Index<usize> for GlobalDescriptorTable {
   type Output = u64;
 
-  fn index(&self, i: usize) -> &Self::Output { &self.0[i] }
+  fn index(&self, i: usize) -> &Self::Output {
+    &self.0[i]
+  }
 }
 
 impl IndexMut<usize> for GlobalDescriptorTable {
-  fn index_mut(&mut self, i: usize) -> &mut Self::Output { &mut self.0[i] }
+  fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+    &mut self.0[i]
+  }
 }
 
-const EXECUTABLE:   u64 = 1 << 43; // Must be set for code segments.
+const EXECUTABLE: u64 = 1 << 43; // Must be set for code segments.
 const USER_SEGMENT: u64 = 1 << 44; // Must be set for user segments
-const PRESENT:      u64 = 1 << 47; // Must be set for any segment
-const LONG_MODE:    u64 = 1 << 53; // Must be set for long mode code segments.
+const PRESENT: u64 = 1 << 47; // Must be set for any segment
+const LONG_MODE: u64 = 1 << 53; // Must be set for long mode code segments.
 
 pub fn kernel_code_segment() -> u64 {
   PRESENT | EXECUTABLE | LONG_MODE | USER_SEGMENT
 }
 
-pub fn null_segment() -> u64 { 0 }
+pub fn null_segment() -> u64 {
+  0
+}
 
 // The layout of the TSS descriptor is a bit messy.
 // See section 6.2.3 of https://www.intel.com/content/dam/support/us/en/documents/processors/pentium4/sb/25366821.pdf
-pub fn tss_segment(tss: &'static TaskSegmentSelector) -> (u64,u64) {
+pub fn tss_segment(tss: &'static TaskSegmentSelector) -> (u64, u64) {
   let tss_ptr = tss as *const _ as u64;
-  let ptr_low = tss_ptr & 0xffffff;     // 0:23
+  let ptr_low = tss_ptr & 0xffffff; // 0:23
   let ptr_mid = (tss_ptr >> 24) & 0xff; // 24:31
-  let ptr_high = tss_ptr >> 32;         // 32:63
+  let ptr_high = tss_ptr >> 32; // 32:63
   let mut segment_low = size_of::<TaskSegmentSelector>() as u64 - 1;
   segment_low |= (ptr_low) << 16;
   segment_low |= 0b1001 << 40; // type 64-bit TSS (available)
@@ -85,7 +95,9 @@ pub fn tss_segment(tss: &'static TaskSegmentSelector) -> (u64,u64) {
 
 pub fn current_cs() -> u16 {
   let segment;
-  unsafe { asm!("mov {:x}, cs", out(reg) segment); }
+  unsafe {
+    asm!("mov {:x}, cs", out(reg) segment);
+  }
   segment
 }
 

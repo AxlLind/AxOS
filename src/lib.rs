@@ -3,7 +3,6 @@
 #![feature(abi_x86_interrupt)]
 #![feature(asm)]
 #![feature(custom_test_frameworks)]
-
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
@@ -16,12 +15,16 @@ mod serial_port;
 
 pub fn hlt_loop() -> ! {
   loop {
-    unsafe { asm!("hlt"); }
+    unsafe {
+      asm!("hlt");
+    }
   }
 }
 
 pub fn hang() -> ! {
-  unsafe { asm!("cli; hlt"); }
+  unsafe {
+    asm!("cli; hlt");
+  }
   unreachable!();
 }
 
@@ -39,7 +42,10 @@ pub trait TestCase {
   fn run(&self);
 }
 
-impl<T> TestCase for T where T: Fn() {
+impl<T> TestCase for T
+where
+  T: Fn(),
+{
   fn run(&self) {
     dbg_no_ln!("{}\t", core::any::type_name::<T>());
     self();
@@ -49,7 +55,7 @@ impl<T> TestCase for T where T: Fn() {
 
 pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
   match tests.len() {
-    0 => {},
+    0 => {}
     1 => dbg!("Running 1 test"),
     i => dbg!("Running {} tests", i),
   }
@@ -80,7 +86,7 @@ macro_rules! test_prelude {
     fn panic(info: &core::panic::PanicInfo) -> ! {
       $crate::test_panic_handler(info);
     }
-  }
+  };
 }
 
 test_prelude!();

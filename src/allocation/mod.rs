@@ -10,6 +10,10 @@ static KERNEL_ALLOCATOR: Allocator = Allocator;
 #[alloc_error_handler]
 fn alloc_error(layout: core::alloc::Layout) -> ! {
   dbg!("\nKernel out of memory error!");
-  dbg!("Tried to allocate layout: size={} align={}", layout.size(), layout.align());
+  dbg!(
+    "Tried to allocate layout: size={} align={}",
+    layout.size(),
+    layout.align()
+  );
   panic!("Kernel OOM");
 }
