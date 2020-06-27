@@ -15,6 +15,17 @@ pub struct IdtEntry {
 }
 
 impl IdtEntry {
+  fn unimplemented() -> Self {
+    Self {
+      ptr_low:  0,
+      selector: 0,
+      options:  0xe00,
+      ptr_mid:  0,
+      ptr_high: 0,
+      reserved: 0,
+    }
+  }
+
   pub fn set_handler(&mut self, fn_ptr: usize) -> &mut Self {
     self.selector = current_cs();
     self.ptr_low = fn_ptr as u16;
@@ -34,15 +45,7 @@ pub struct InterruptDescriptorTable([IdtEntry; 256]);
 
 impl InterruptDescriptorTable {
   pub fn new() -> Self {
-    let unimplemented_entry = IdtEntry {
-      ptr_low:  0,
-      selector: 0,
-      options:  0xe00,
-      ptr_mid:  0,
-      ptr_high: 0,
-      reserved: 0,
-    };
-    Self([unimplemented_entry; 256])
+    Self([IdtEntry::unimplemented(); 256])
   }
 
   // Safe since the IDT is static
@@ -64,4 +67,24 @@ impl IndexMut<usize> for InterruptDescriptorTable {
   fn index_mut(&mut self, i: usize) -> &mut Self::Output {
     &mut self.0[i]
   }
+}
+
+#[test_case]
+fn idt_entry_set_fns() {
+  let mut entry = IdtEntry::unimplemented();
+  assert_eq!(entry.options, 0xe00);
+  assert_eq!(entry.ptr_low, 0);
+  assert_eq!(entry.ptr_mid, 0);
+  assert_eq!(entry.ptr_high, 0);
+
+  let fn_ptr = 0x1111222233334444;
+  entry.set_handler(fn_ptr);
+  assert_eq!(entry.selector, current_cs());
+  assert_eq!(entry.options, 0x8e00);
+  assert_eq!(entry.ptr_low, 0x4444);
+  assert_eq!(entry.ptr_mid, 0x3333);
+  assert_eq!(entry.ptr_high, 0x11112222);
+
+  entry.with_ist(1);
+  assert_eq!(entry.options, 0x8e01);
 }
