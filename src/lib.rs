@@ -6,8 +6,6 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use core::panic::PanicInfo;
-
 #[macro_use]
 pub mod dbg_print;
 mod io;
@@ -28,7 +26,7 @@ pub fn hang() -> ! {
   unreachable!();
 }
 
-pub fn qemu_exit_success() -> ! {
+fn qemu_exit_success() -> ! {
   io::send(0xf4, 0x10);
   hang();
 }
@@ -42,10 +40,7 @@ pub trait TestCase {
   fn run(&self);
 }
 
-impl<T> TestCase for T
-where
-  T: Fn(),
-{
+impl<T: Fn()> TestCase for T {
   fn run(&self) {
     dbg_no_ln!("{}\t", core::any::type_name::<T>());
     self();
@@ -60,16 +55,9 @@ pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
   qemu_exit_success();
 }
 
-pub fn test_panic_handler(info: &PanicInfo) -> ! {
-  dbg!("[failed]");
-  dbg!("Error: {}", info);
-  qemu_exit_failure();
-}
-
 #[macro_export]
 macro_rules! test_prelude {
   ($init:expr) => {
-    #[cfg(test)]
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
       $init();
@@ -77,15 +65,17 @@ macro_rules! test_prelude {
       $crate::hlt_loop();
     }
 
-    #[cfg(test)]
     #[panic_handler]
-    fn panic(info: &core::panic::PanicInfo) -> ! {
-      $crate::test_panic_handler(info);
+    fn panic_handler(info: &core::panic::PanicInfo) -> ! {
+      $crate::dbg!("[failed]");
+      $crate::dbg!("Error: {}", info);
+      $crate::qemu_exit_failure();
     }
   };
   () => {
-    $crate::test_prelude!((|| {}));
+    $crate::test_prelude!(|| {});
   };
 }
 
+#[cfg(test)]
 test_prelude!();

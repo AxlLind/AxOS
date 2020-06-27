@@ -6,6 +6,8 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(ax_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![cfg_attr(test, allow(unused_imports))]
+#![cfg_attr(test, allow(dead_code))]
 
 extern crate alloc;
 
@@ -18,33 +20,31 @@ mod interrupts;
 mod io;
 mod serial_port;
 mod vga_device;
-use vga_device::VgaColor;
+use vga_device::{VgaColor, VgaDevice};
+
+fn initialize() {
+  dbg_print::initialize();
+  interrupts::initialize();
+}
+
+#[cfg(test)]
+ax_os::test_prelude!(initialize);
 
 #[cfg(not(test))]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+fn panic_handler(info: &PanicInfo) -> ! {
   dbg!("Kernel panicked!");
   dbg!("Error: {}", info);
   ax_os::hang();
 }
 
-#[cfg(test)]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-  ax_os::test_panic_handler(info);
-}
-
+#[cfg(not(test))]
 #[no_mangle]
 pub fn _start() -> ! {
-  dbg_print::initialize();
-  interrupts::initialize();
-
-  #[cfg(test)]
-  test_main();
-
-  let mut vga_device = vga_device::VgaDevice::new();
+  initialize();
+  let mut vga = VgaDevice::new();
   for (i, &c) in b"Hello world".iter().enumerate() {
-    vga_device.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
+    vga.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
   }
   ax_os::hlt_loop();
 }
