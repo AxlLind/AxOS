@@ -116,9 +116,14 @@ pub unsafe fn load_tss(segment_index: u16) {
   asm!("ltr {:x}", in(reg) segment_index);
 }
 
-#[test_case]
-fn size_check() {
-  use core::mem::size_of;
-  assert_eq!(size_of::<TaskSegmentSelector>(), 104);
-  assert_eq!(size_of::<GlobalDescriptorTable>(), 8 * 4);
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test_case]
+  fn size_check() {
+    use core::mem::size_of;
+    assert_eq!(size_of::<TaskSegmentSelector>(), 104);
+    assert_eq!(size_of::<GlobalDescriptorTable>(), 8 * 4);
+  }
 }

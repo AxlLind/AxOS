@@ -9,7 +9,7 @@ pub fn initialize() {
   serial_port::initialize(COM1);
 }
 
-pub struct DebugPrinter;
+struct DebugPrinter;
 
 impl Write for DebugPrinter {
   fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {

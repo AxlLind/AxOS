@@ -96,9 +96,14 @@ pub fn initialize() {
   unsafe { asm!("sti") };
 }
 
-#[test_case]
-fn size_check() {
-  use core::mem::size_of;
-  assert_eq!(size_of::<DescriptorTablePtr>(), 10);
-  assert_eq!(size_of::<InterruptStackFrame>(), 40);
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test_case]
+  fn size_check() {
+    use core::mem::size_of;
+    assert_eq!(size_of::<DescriptorTablePtr>(), 10);
+    assert_eq!(size_of::<InterruptStackFrame>(), 40);
+  }
 }

@@ -40,6 +40,7 @@ impl<T: Fn()> TestCase for T {
   fn run(&self) {
     let (module, name) = core::any::type_name::<T>()
       .split("::")
+      .filter(|&module| module != "tests")
       .fold(("", ""), |(_, module), name| (module, name));
     dbg_no_ln!("{}::{}\t", module, name);
     self();
