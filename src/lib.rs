@@ -38,7 +38,10 @@ pub trait TestCase {
 
 impl<T: Fn()> TestCase for T {
   fn run(&self) {
-    dbg_no_ln!("{}\t", core::any::type_name::<T>());
+    let (module, name) = core::any::type_name::<T>()
+      .split("::")
+      .fold(("", ""), |(_, module), name| (module, name));
+    dbg_no_ln!("{}::{}\t", module, name);
     self();
     dbg!("[success]");
   }
