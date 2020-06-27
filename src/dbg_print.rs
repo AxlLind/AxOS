@@ -1,5 +1,5 @@
 use crate::serial_port;
-use core::fmt;
+use core::fmt::{self, Write};
 
 // QEMU accepts debug output on the COM1 serial port
 // Reference: https://wiki.osdev.org/Serial_Ports
@@ -11,7 +11,7 @@ pub fn initialize() {
 
 pub struct DebugPrinter;
 
-impl fmt::Write for DebugPrinter {
+impl Write for DebugPrinter {
   fn write_str(&mut self, s: &str) -> Result<(), fmt::Error> {
     for b in s.bytes() {
       serial_port::send(COM1, b);
@@ -22,7 +22,6 @@ impl fmt::Write for DebugPrinter {
 
 #[doc(hidden)]
 pub fn __print(args: fmt::Arguments) {
-  use fmt::Write;
   DebugPrinter.write_fmt(args).unwrap();
 }
 
