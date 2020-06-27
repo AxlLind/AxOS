@@ -20,19 +20,19 @@ impl fmt::Write for DebugPrinter {
   }
 }
 
-#[allow(unused_macros)]
+#[doc(hidden)]
+pub fn __print(args: fmt::Arguments) {
+  use fmt::Write;
+  DebugPrinter.write_fmt(args).unwrap();
+}
+
 #[macro_export]
 macro_rules! dbg_no_ln {
-  ($($e:expr),+ $(,)?) => {{
-    use core::fmt::Write;
-    write!($crate::dbg_print::DebugPrinter, $($e),+).unwrap();
-  }}
+  ($($e:tt)+) => { $crate::dbg_print::__print(format_args!($($e)+)) };
 }
 
 #[macro_export]
 macro_rules! dbg {
-  ($($e:expr),+ $(,)?) => {{
-    use core::fmt::Write;
-    writeln!($crate::dbg_print::DebugPrinter, $($e),+).unwrap();
-  }}
+  () => { $crate::dbg_no_ln!("\n") };
+  ($($e:tt)+) => { $crate::dbg_no_ln!("{}\n", format_args!($($e)+)) };
 }
