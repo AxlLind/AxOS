@@ -73,18 +73,14 @@ impl IndexMut<usize> for InterruptDescriptorTable {
 fn idt_entry_set_fns() {
   let mut entry = IdtEntry::unimplemented();
   assert_eq!(entry.options, 0xe00);
-  assert_eq!(entry.ptr_low, 0);
-  assert_eq!(entry.ptr_mid, 0);
-  assert_eq!(entry.ptr_high, 0);
 
-  let fn_ptr = 0x1111222233334444;
-  entry.set_handler(fn_ptr);
+  entry.set_handler(0x0000111122223333);
   assert_eq!(entry.selector, current_cs());
   assert_eq!(entry.options, 0x8e00);
-  assert_eq!(entry.ptr_low, 0x4444);
-  assert_eq!(entry.ptr_mid, 0x3333);
-  assert_eq!(entry.ptr_high, 0x11112222);
+  assert_eq!(entry.ptr_low, 0x3333);
+  assert_eq!(entry.ptr_mid, 0x2222);
+  assert_eq!(entry.ptr_high, 0x1111);
 
-  entry.with_ist(1);
-  assert_eq!(entry.options, 0x8e01);
+  entry.with_ist(5);
+  assert_eq!(entry.options, 0x8e05);
 }
