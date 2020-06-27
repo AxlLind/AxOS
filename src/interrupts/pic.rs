@@ -2,6 +2,7 @@ use crate::io;
 
 const PIC1_CMD: u16 = 0x20;
 const PIC1_DATA: u16 = 0x21;
+
 const PIC2_CMD: u16 = 0xa0;
 const PIC2_DATA: u16 = 0xa1;
 

@@ -43,9 +43,7 @@ extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
 
 extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
   dbg_no_ln!(".");
-  unsafe {
-    pic::end_of_interrupt(0);
-  }
+  unsafe { pic::end_of_interrupt(0) };
 }
 
 extern "x86-interrupt" fn double_fault_handler(
@@ -87,10 +85,8 @@ lazy_static! {
 
 pub fn initialize() {
   GDT.load();
-  unsafe {
-    gdt::set_cs(8);
-    gdt::load_tss(16);
-  }
+  unsafe { gdt::set_cs(8) };
+  unsafe { gdt::load_tss(16) };
   IDT.load();
   pic::initialize();
   unsafe { asm!("sti") };
