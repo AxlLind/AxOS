@@ -70,6 +70,13 @@ impl IndexMut<usize> for InterruptDescriptorTable {
 }
 
 #[test_case]
+fn size_check() {
+  use core::mem::size_of;
+  assert_eq!(size_of::<IdtEntry>(), 16);
+  assert_eq!(size_of::<InterruptDescriptorTable>(), 256 * 16);
+}
+
+#[test_case]
 fn idt_entry_set_fns() {
   let mut entry = IdtEntry::unimplemented();
   assert_eq!(entry.options, 0xe00);
