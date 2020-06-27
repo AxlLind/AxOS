@@ -12,48 +12,36 @@
 
 #[inline(always)]
 pub fn send(port: u16, v: u8) {
-  unsafe {
-    asm!("out dx,al", in("dx") port, in("al") v);
-  }
+  unsafe { asm!("out dx,al", in("dx") port, in("al") v) };
 }
 
 #[inline(always)]
 pub fn read(port: u16) -> u8 {
   let i;
-  unsafe {
-    asm!("in al,dx", out("al") i, in("dx") port);
-  }
+  unsafe { asm!("in al,dx", out("al") i, in("dx") port) };
   i
 }
 
 #[inline(always)]
 pub fn send_u16(port: u16, v: u16) {
-  unsafe {
-    asm!("out dx,ax", in("dx") port, in("ax") v);
-  }
+  unsafe { asm!("out dx,ax", in("dx") port, in("ax") v) };
 }
 
 #[inline(always)]
 pub fn read_u16(port: u16) -> u16 {
   let i;
-  unsafe {
-    asm!("in ax,dx", out("ax") i, in("dx") port);
-  }
+  unsafe { asm!("in ax,dx", out("ax") i, in("dx") port) };
   i
 }
 
 #[inline(always)]
 pub fn send_u32(port: u16, v: u32) {
-  unsafe {
-    asm!("out dx,eax", in("dx") port, in("eax") v);
-  }
+  unsafe { asm!("out dx,eax", in("dx") port, in("eax") v) };
 }
 
 #[inline(always)]
 pub fn read_u32(port: u16) -> u32 {
   let i;
-  unsafe {
-    asm!("in eax,dx", out("eax") i, in("dx") port);
-  }
+  unsafe { asm!("in eax,dx", out("eax") i, in("dx") port) };
   i
 }

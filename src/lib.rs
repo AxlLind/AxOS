@@ -13,16 +13,12 @@ mod serial_port;
 
 pub fn hlt_loop() -> ! {
   loop {
-    unsafe {
-      asm!("hlt");
-    }
+    unsafe { asm!("hlt") };
   }
 }
 
 pub fn hang() -> ! {
-  unsafe {
-    asm!("cli; hlt");
-  }
+  unsafe { asm!("cli; hlt") };
   unreachable!();
 }
 

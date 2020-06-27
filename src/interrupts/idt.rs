@@ -48,9 +48,7 @@ impl InterruptDescriptorTable {
   // Safe since the IDT is static
   pub fn load(&'static self) {
     let ptr = DescriptorTablePtr::ptr_to(self);
-    unsafe {
-      asm!("lidt [{}]", in(reg) &ptr);
-    }
+    unsafe { asm!("lidt [{}]", in(reg) &ptr) };
   }
 }
 

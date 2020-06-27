@@ -45,9 +45,7 @@ impl GlobalDescriptorTable {
   // Safe since the GDT is static
   pub fn load(&'static self) {
     let ptr = DescriptorTablePtr::ptr_to(self);
-    unsafe {
-      asm!("lgdt [{}]", in(reg) &ptr);
-    }
+    unsafe { asm!("lgdt [{}]", in(reg) &ptr) };
   }
 }
 
@@ -95,9 +93,7 @@ pub fn tss_segment(tss: &'static TaskSegmentSelector) -> (u64, u64) {
 
 pub fn current_cs() -> u16 {
   let segment;
-  unsafe {
-    asm!("mov {:x}, cs", out(reg) segment);
-  }
+  unsafe { asm!("mov {:x}, cs", out(reg) segment) };
   segment
 }
 

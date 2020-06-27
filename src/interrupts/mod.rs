@@ -1,11 +1,12 @@
 use core::mem::size_of;
 use lazy_static::lazy_static;
 
-mod idt;
-use idt::InterruptDescriptorTable;
 mod gdt;
-use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
+mod idt;
 mod pic;
+
+use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
+use idt::InterruptDescriptorTable;
 
 // Used to load the IDT and GDT tables
 #[repr(packed)]
@@ -92,7 +93,5 @@ pub fn initialize() {
   }
   IDT.load();
   pic::initialize();
-  unsafe {
-    asm!("sti");
-  }
+  unsafe { asm!("sti") };
 }
