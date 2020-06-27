@@ -53,23 +53,20 @@ pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
 
 #[macro_export]
 macro_rules! test_prelude {
-  ($init:expr) => {
-    #[no_mangle]
-    pub extern "C" fn _start() -> ! {
-      $init();
-      test_main();
-      $crate::hlt_loop();
-    }
-
+  ($($init_fn:expr)?) => {
     #[panic_handler]
     fn panic_handler(info: &core::panic::PanicInfo) -> ! {
       $crate::dbg!("[failed]");
       $crate::dbg!("Error: {}", info);
       $crate::qemu_exit_failure();
     }
-  };
-  () => {
-    $crate::test_prelude!(|| {});
+
+    #[no_mangle]
+    pub extern "C" fn _start() -> ! {
+      $($init_fn();)?
+      test_main();
+      $crate::hlt_loop();
+    }
   };
 }
 
