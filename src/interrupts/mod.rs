@@ -1,9 +1,10 @@
+use crate::hang;
 use core::mem::size_of;
 use lazy_static::lazy_static;
 
-mod gdt;
-mod idt;
-mod pic;
+pub mod gdt;
+pub mod idt;
+pub mod pic;
 
 use gdt::{GlobalDescriptorTable, TaskSegmentSelector};
 use idt::InterruptDescriptorTable;
@@ -27,7 +28,7 @@ impl DescriptorTablePtr {
 // https://wiki.osdev.org/Exceptions
 #[derive(Debug)]
 #[repr(C)]
-struct InterruptStackFrame {
+pub struct InterruptStackFrame {
   instruction_ptr: u64,
   code_segment: u64,
   cpu_flags: u64,
@@ -38,7 +39,7 @@ struct InterruptStackFrame {
 extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
   dbg!("breakpoint interrupt!");
   dbg!("{:x?}", frame);
-  ax_os::hang();
+  hang();
 }
 
 extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
@@ -52,7 +53,7 @@ extern "x86-interrupt" fn double_fault_handler(
 ) -> ! {
   dbg!("double fault interrupt!");
   dbg!("{:x?}", frame);
-  ax_os::hang();
+  hang();
 }
 
 lazy_static! {

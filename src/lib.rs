@@ -5,9 +5,11 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![allow(clippy::all)] // clippy will run library lints
 
 #[macro_use]
 pub mod dbg_print;
+pub mod interrupts;
 mod io;
 mod serial_port;
 
@@ -22,7 +24,7 @@ pub fn hang() -> ! {
   unreachable!();
 }
 
-fn qemu_exit_success() -> ! {
+pub fn qemu_exit_success() -> ! {
   io::send(0xf4, 0x10);
   hang();
 }
@@ -65,6 +67,7 @@ macro_rules! test_prelude {
       $crate::qemu_exit_failure();
     }
 
+    #[allow(unreachable_code)]
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
       $($init_fn();)?
@@ -74,5 +77,6 @@ macro_rules! test_prelude {
   };
 }
 
+// do not run any tests from this file
 #[cfg(test)]
-test_prelude!();
+test_prelude!(qemu_exit_success);
