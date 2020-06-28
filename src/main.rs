@@ -11,7 +11,7 @@
 
 extern crate alloc;
 
-use ax_os::hang;
+use ax_os::{hang, indexable_from_field};
 use core::panic::PanicInfo;
 
 #[macro_use]

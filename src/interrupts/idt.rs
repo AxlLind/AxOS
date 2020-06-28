@@ -1,6 +1,6 @@
 use super::gdt::current_cs;
 use super::DescriptorTablePtr;
-use core::ops::{Index, IndexMut};
+use crate::indexable_from_field;
 
 // Reference: https://wiki.osdev.org/Interrupt_Descriptor_Table#IDT_in_IA-32e_Mode_.2864-bit_IDT.29
 #[derive(Clone, Copy)]
@@ -55,19 +55,7 @@ impl InterruptDescriptorTable {
   }
 }
 
-impl Index<usize> for InterruptDescriptorTable {
-  type Output = IdtEntry;
-
-  fn index(&self, i: usize) -> &Self::Output {
-    &self.0[i]
-  }
-}
-
-impl IndexMut<usize> for InterruptDescriptorTable {
-  fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-    &mut self.0[i]
-  }
-}
+indexable_from_field!(InterruptDescriptorTable, 0, IdtEntry);
 
 #[cfg(test)]
 mod tests {

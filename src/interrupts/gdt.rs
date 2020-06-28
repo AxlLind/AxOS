@@ -1,6 +1,6 @@
 use super::DescriptorTablePtr;
+use crate::indexable_from_field;
 use core::mem::size_of;
-use core::ops::{Index, IndexMut};
 
 // Reference: https://wiki.osdev.org/TSS
 #[repr(C, packed)]
@@ -49,19 +49,7 @@ impl GlobalDescriptorTable {
   }
 }
 
-impl Index<usize> for GlobalDescriptorTable {
-  type Output = u64;
-
-  fn index(&self, i: usize) -> &Self::Output {
-    &self.0[i]
-  }
-}
-
-impl IndexMut<usize> for GlobalDescriptorTable {
-  fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-    &mut self.0[i]
-  }
-}
+indexable_from_field!(GlobalDescriptorTable, 0, u64);
 
 const EXECUTABLE: u64 = 1 << 43; // Must be set for code segments.
 const USER_SEGMENT: u64 = 1 << 44; // Must be set for user segments

@@ -77,6 +77,23 @@ macro_rules! test_prelude {
   };
 }
 
+#[macro_export]
+macro_rules! indexable_from_field {
+  ($T:ty, $field:tt, $Out:ty) => {
+    impl core::ops::Index<usize> for $T {
+      type Output = $Out;
+      fn index(&self, i: usize) -> &Self::Output {
+        &self.$field[i]
+      }
+    }
+    impl core::ops::IndexMut<usize> for $T {
+      fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        &mut self.$field[i]
+      }
+    }
+  };
+}
+
 // do not run any tests from this file
 #[cfg(test)]
 test_prelude!(qemu_exit_success);
