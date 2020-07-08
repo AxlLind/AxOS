@@ -8,6 +8,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![cfg_attr(test, allow(unused_imports))]
 #![cfg_attr(test, allow(dead_code))]
+#![allow(clippy::identity_op)]
 
 extern crate alloc;
 
