@@ -2,4 +2,4 @@
 target = "x86_64-os-target.json"
 
 [target.'cfg(target_os = "none")']
-runner = "bootimage runner"
+runner = "bootimage runner --quiet"

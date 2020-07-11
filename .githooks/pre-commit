@@ -9,4 +9,4 @@ touch src/main.rs # force recompilation
 cargo xclippy -- -D warnings
 
 echo "Running tests.."
-cargo xtest 2> /dev/null | rg --invert-match "(Building bootloader|Running: \`qemu)"
+cargo xtest 2> /dev/null
