@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+pub mod page_table;
+
 pub const PHYS_MEM_OFFSET: u64 = 0x20000000000; // specified in Cargo.toml
 
 #[derive(Clone, Copy, Debug)]
