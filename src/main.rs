@@ -42,7 +42,7 @@ fn panic_handler(info: &PanicInfo) -> ! {
 
 #[cfg(not(test))]
 #[no_mangle]
-pub fn _start() -> ! {
+pub fn _start(_: bootloader::BootInfo) -> ! {
   initialize();
   let mut vga = VgaDevice::new();
   for (i, &c) in b"Hello world".iter().enumerate() {
