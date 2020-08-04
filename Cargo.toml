@@ -5,7 +5,7 @@ authors = ["Axel Lindeberg <axel.ew.lindeberg@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-bootloader = "0.9.4"
+bootloader = { version = "0.9.4", features = ["map_physical_memory"] }
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 
 [package.metadata.bootimage]
@@ -16,3 +16,6 @@ test-args = [
   "-display", "none",
 ]
 test-success-exit-code = 33
+
+[package.metadata.bootloader]
+physical-memory-offset = "0x20000000000"

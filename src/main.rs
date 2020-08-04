@@ -20,6 +20,7 @@ mod dbg_print;
 mod allocation;
 mod interrupts;
 mod io;
+mod mem;
 mod serial_port;
 mod vga_device;
 use vga_device::{VgaColor, VgaDevice};
