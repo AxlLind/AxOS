@@ -26,33 +26,38 @@ pub fn hang() -> ! {
 
 pub fn qemu_exit_success() -> ! {
   io::send(0xf4, 0x10);
-  hang();
+  unreachable!();
 }
 
 pub fn qemu_exit_failure() -> ! {
   io::send(0xf4, 0x11);
-  hang();
+  unreachable!();
 }
 
 pub trait TestCase {
+  fn name(&self) -> (&'static str, &'static str) {
+    core::any::type_name::<Self>()
+      .split("::")
+      .filter(|&module| module != "tests")
+      .fold(("", ""), |(_, module), name| (module, name))
+  }
   fn run(&self);
 }
 
 impl<T: Fn()> TestCase for T {
   fn run(&self) {
-    let (module, name) = core::any::type_name::<T>()
-      .split("::")
-      .filter(|&module| module != "tests")
-      .fold(("", ""), |(_, module), name| (module, name));
-    dbg_no_ln!("{}::{}\t", module, name);
     self();
-    dbg!("[success]");
   }
 }
 
 pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
   for test in tests {
+    let (module, name) = test.name();
+    let padding = 40 - module.len() - name.len();
+    dbg_no_ln!("{}::{}", module, name);
+    dbg_no_ln!("{:<1$}", "", padding);
     test.run();
+    dbg!("[success]");
   }
   qemu_exit_success();
 }
