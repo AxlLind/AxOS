@@ -9,6 +9,7 @@
 #![cfg_attr(test, allow(unused_imports))]
 #![cfg_attr(test, allow(dead_code))]
 #![allow(clippy::identity_op)]
+#![allow(unused_unsafe)]
 
 extern crate alloc;
 
@@ -49,5 +50,10 @@ pub fn _start(_: bootloader::BootInfo) -> ! {
   for (i, &c) in b"Hello world".iter().enumerate() {
     vga.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
   }
+  dbg!("VGA: 0xb8001 -> {:x}", unsafe {
+    mem::page_table::translate_addr(mem::VirtAddr::new(0xb8001))
+      .unwrap()
+      .as_u64()
+  });
   ax_os::hlt_loop();
 }

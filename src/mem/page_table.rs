@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use super::PhysAddr;
+use super::{PhysAddr, VirtAddr};
 use crate::indexable_from_field;
 
 const PRESENT: u64 = 1 << 0;
@@ -21,7 +21,7 @@ const PHYS_ADDR_MASK: u64 = 0x000f_ffff_ffff_f000;
 pub struct PageTableEntry(pub u64);
 
 impl PageTableEntry {
-  pub fn addr(&mut self) -> PhysAddr {
+  pub fn addr(&self) -> PhysAddr {
     PhysAddr::new(self.0 & PHYS_ADDR_MASK)
   }
 
@@ -90,6 +90,46 @@ impl PageTable {
 
 indexable_from_field!(PageTable, 0, PageTableEntry);
 
+pub fn cr3() -> (u64, u64) {
+  let cr3: u64;
+  unsafe { asm!("mov {}, cr3", out(reg) cr3) };
+  (cr3 & PHYS_ADDR_MASK, cr3 & !PHYS_ADDR_MASK)
+}
+
+pub unsafe fn active_level_four_table() -> &'static mut PageTable {
+  let (cr3, _) = cr3();
+  let addr = PhysAddr::new(cr3).to_virt();
+  &mut *addr.as_mut_ptr()
+}
+
+pub unsafe fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {
+  let indexes = [
+    (addr.as_u64() >> 39) & 0x1ff,
+    (addr.as_u64() >> 30) & 0x1ff,
+    (addr.as_u64() >> 21) & 0x1ff,
+    (addr.as_u64() >> 12) & 0x1ff,
+  ];
+  let level_four_page = PhysAddr::new(cr3().0);
+  indexes
+    .iter()
+    .fold(Some(level_four_page), |frame, &index| match frame {
+      Some(frame) => {
+        let table_ptr = frame.to_virt().as_ptr::<PageTable>();
+        let table = unsafe { &*table_ptr };
+        let entry = table[index as usize];
+        if entry.unused() {
+          return None;
+        }
+        Some(entry.addr())
+      }
+      None => None,
+    })
+    .map(|frame| {
+      let offset = addr.as_u64() & 0xfff;
+      PhysAddr::new(frame.as_u64() + offset)
+    })
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -117,5 +157,13 @@ mod tests {
     bit_test!(writable, set_writable);
     bit_test!(non_executable, set_non_executable);
     bit_test!(user_accessible, set_user_accessible);
+  }
+
+  #[test_case]
+  fn virt_to_phys_translation() {
+    // works since we know the VGA buffer is identity-mapped
+    let virt_addr = VirtAddr::new(0xb8001);
+    let phys_addr = unsafe { translate_addr(virt_addr).unwrap() };
+    assert_eq!(phys_addr.as_u64(), 0xb8001);
   }
 }
