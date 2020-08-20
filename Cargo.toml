@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 bootloader = { version = "0.9.4", features = ["map_physical_memory"] }
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
+spin = "0.5.2"
 
 [package.metadata.bootimage]
 run-args = ["-serial", "stdio"]

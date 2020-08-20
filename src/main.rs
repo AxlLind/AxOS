@@ -14,6 +14,7 @@
 extern crate alloc;
 
 use ax_os::{hang, indexable_from_field};
+use bootloader::BootInfo;
 use core::panic::PanicInfo;
 
 #[macro_use]
@@ -24,6 +25,7 @@ mod io;
 mod mem;
 mod serial_port;
 mod vga_device;
+use mem::frame_allocator::FrameAllocator;
 use vga_device::{VgaColor, VgaDevice};
 
 fn initialize() {
@@ -44,8 +46,11 @@ fn panic_handler(info: &PanicInfo) -> ! {
 
 #[cfg(not(test))]
 #[no_mangle]
-pub fn _start(_: bootloader::BootInfo) -> ! {
+pub fn _start(info: &'static BootInfo) -> ! {
   initialize();
+  FrameAllocator::initialize(&info.memory_map);
+  let frame = FrameAllocator::the().alloc();
+  dbg!("{:x?}", frame);
   let mut vga = VgaDevice::new();
   for (i, &c) in b"Hello world".iter().enumerate() {
     vga.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
