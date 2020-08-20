@@ -112,21 +112,18 @@ pub unsafe fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {
   let level_four_page = PhysAddr::new(cr3().0);
   indexes
     .iter()
-    .fold(Some(level_four_page), |frame, &index| match frame {
-      Some(frame) => {
-        let table_ptr = frame.to_virt().as_ptr::<PageTable>();
-        let table = unsafe { &*table_ptr };
-        let entry = table[index as usize];
-        if entry.unused() {
-          return None;
-        }
-        Some(entry.addr())
+    .fold(Some(level_four_page), |table_addr, &index| {
+      let table_ptr = table_addr?.to_virt().as_ptr::<PageTable>();
+      let table = unsafe { &*table_ptr };
+      let entry = table[index as usize];
+      if entry.unused() {
+        return None;
       }
-      None => None,
+      Some(entry.addr())
     })
-    .map(|frame| {
+    .map(|res| {
       let offset = addr.as_u64() & 0xfff;
-      PhysAddr::new(frame.as_u64() + offset)
+      PhysAddr::new(res.as_u64() + offset)
     })
 }
 
