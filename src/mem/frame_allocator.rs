@@ -1,4 +1,4 @@
-use super::PhysAddr;
+use super::{PhysAddr, VirtAddr};
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use lazy_static::lazy_static;
 use spin::{Mutex, MutexGuard};
@@ -9,11 +9,11 @@ pub struct FrameAllocator {
 }
 
 lazy_static! {
-  static ref DUMMY_MAP: MemoryMap = MemoryMap::new();
   static ref FRAME_ALLOCATOR: Mutex<FrameAllocator> = {
-    // The dummy map is just so we have something to instantiate with
+    // Super-unsafe but FrameAllocator::initialize
+    // should be called before ever touching this!
     let allocator = FrameAllocator {
-      memory_map:    &DUMMY_MAP,
+      memory_map:    unsafe { &* VirtAddr::new(0).as_ptr() },
       current_index: 0,
     };
     Mutex::new(allocator)
