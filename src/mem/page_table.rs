@@ -18,7 +18,7 @@ const PHYS_ADDR_MASK: u64 = 0x000f_ffff_ffff_f000;
 // Reference: https://os.phil-opp.com/paging-introduction/#page-table-format
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub struct PageTableEntry(pub u64);
+pub struct PageTableEntry(u64);
 
 impl PageTableEntry {
   pub fn addr(&self) -> PhysAddr {
