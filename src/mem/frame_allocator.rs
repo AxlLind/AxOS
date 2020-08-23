@@ -1,19 +1,17 @@
-use super::{PhysAddr, VirtAddr};
+use super::PhysAddr;
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use lazy_static::lazy_static;
 use spin::{Mutex, MutexGuard};
 
 pub struct FrameAllocator {
-  memory_map:    &'static MemoryMap,
+  memory_map:    Option<&'static MemoryMap>,
   current_index: usize,
 }
 
 lazy_static! {
   static ref FRAME_ALLOCATOR: Mutex<FrameAllocator> = {
-    // Super-unsafe but FrameAllocator::initialize
-    // should be called before ever touching this!
     let allocator = FrameAllocator {
-      memory_map:    unsafe { &* VirtAddr::new(0).as_ptr() },
+      memory_map:    None,
       current_index: 0,
     };
     Mutex::new(allocator)
@@ -27,12 +25,13 @@ impl FrameAllocator {
   }
 
   pub fn initialize(memory_map: &'static MemoryMap) {
-    Self::the().memory_map = memory_map;
+    Self::the().memory_map = Some(memory_map);
   }
 
   pub fn alloc(&mut self) -> Option<PhysAddr> {
     let addr = self
       .memory_map
+      .unwrap()
       .iter()
       .filter(|region| region.region_type == MemoryRegionType::Usable)
       .flat_map(|region| {
