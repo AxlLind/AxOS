@@ -43,7 +43,7 @@ lazy_static! {
   };
 }
 
-fn initialize() {
+fn initialize(_: &'static bootloader::BootInfo) {
   GDT.load();
   unsafe { gdt::set_cs(8) };
   unsafe { gdt::load_tss(16) };

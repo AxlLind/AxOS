@@ -74,10 +74,10 @@ macro_rules! test_prelude {
 
     #[allow(unreachable_code)]
     #[no_mangle]
-    pub extern "C" fn _start() -> ! {
-      $($init_fn();)?
+    pub extern "C" fn _start(info: &'static bootloader::BootInfo) -> ! {
+      $($init_fn(&info);)?
       test_main();
-      $crate::hlt_loop();
+      unreachable!();
     }
   };
 }
@@ -101,4 +101,9 @@ macro_rules! indexable_from_field {
 
 // do not run any tests from this file
 #[cfg(test)]
-test_prelude!(qemu_exit_success);
+fn exit_immediately(_: &'static bootloader::BootInfo) {
+  qemu_exit_success();
+}
+
+#[cfg(test)]
+test_prelude!(exit_immediately);

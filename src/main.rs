@@ -28,8 +28,9 @@ mod vga_device;
 use mem::frame_allocator::FrameAllocator;
 use vga_device::{VgaColor, VgaDevice};
 
-fn initialize() {
+fn initialize(info: &'static BootInfo) {
   dbg_print::initialize();
+  FrameAllocator::initialize(&info.memory_map);
   interrupts::initialize();
 }
 
@@ -47,10 +48,7 @@ fn panic_handler(info: &PanicInfo) -> ! {
 #[cfg(not(test))]
 #[no_mangle]
 pub fn _start(info: &'static BootInfo) -> ! {
-  initialize();
-  FrameAllocator::initialize(&info.memory_map);
-  let frame = FrameAllocator::the().alloc();
-  dbg!("{:x?}", frame);
+  initialize(&info);
   let mut vga = VgaDevice::new();
   for (i, &c) in b"Hello world".iter().enumerate() {
     vga.write_char(i, i, c, VgaColor::Green, VgaColor::Black);
