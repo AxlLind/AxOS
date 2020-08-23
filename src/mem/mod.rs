@@ -28,6 +28,15 @@ impl VirtAddr {
   pub fn is_page_aligned(&self) -> bool {
     self.0.trailing_zeros() >= 12
   }
+
+  pub fn page_table_indexes(&self) -> [u64; 4] {
+    [
+      (self.0 >> 39) & 0x1ff,
+      (self.0 >> 30) & 0x1ff,
+      (self.0 >> 21) & 0x1ff,
+      (self.0 >> 12) & 0x1ff,
+    ]
+  }
 }
 
 #[derive(Clone, Copy, Debug)]

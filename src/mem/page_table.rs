@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use super::frame_allocator::FrameAllocator;
 use super::{PhysAddr, VirtAddr};
 use crate::indexable_from_field;
 
@@ -102,15 +103,10 @@ pub fn active_level_four_table() -> &'static mut PageTable {
   unsafe { &mut *addr.as_mut_ptr() }
 }
 
-pub unsafe fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {
-  let indexes = [
-    (addr.as_u64() >> 39) & 0x1ff,
-    (addr.as_u64() >> 30) & 0x1ff,
-    (addr.as_u64() >> 21) & 0x1ff,
-    (addr.as_u64() >> 12) & 0x1ff,
-  ];
+pub fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {
   let level_four_page = PhysAddr::new(cr3().0);
-  indexes
+  addr
+    .page_table_indexes()
     .iter()
     .fold(Some(level_four_page), |table_addr, &index| {
       let table_ptr = table_addr?.to_virt().as_ptr::<PageTable>();
@@ -125,6 +121,24 @@ pub unsafe fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {
       let offset = addr.as_u64() & 0xfff;
       PhysAddr::new(res.as_u64() + offset)
     })
+}
+
+pub fn page_map_addr(addr: VirtAddr) {
+  assert!(addr.is_page_aligned());
+  let mut table = active_level_four_table();
+  for &i in &addr.page_table_indexes() {
+    let entry = &mut table[i as usize];
+    if entry.unused() {
+      let frame_addr = FrameAllocator::the().alloc().expect("OOM");
+      unsafe { entry.set_addr(frame_addr) }
+        .set_present(true)
+        .set_writable(true)
+        .set_non_executable(true);
+    }
+    let next_addr = entry.addr().to_virt();
+    table = unsafe { &mut *next_addr.as_mut_ptr() };
+  }
+  unsafe { asm!("invlpg [{}]", in(reg) addr.as_u64()) };
 }
 
 #[cfg(test)]
@@ -162,5 +176,21 @@ mod tests {
     let virt_addr = VirtAddr::new(0xb8001);
     let phys_addr = unsafe { translate_addr(virt_addr).unwrap() };
     assert_eq!(phys_addr.as_u64(), 0xb8001);
+  }
+
+  #[test_case]
+  fn addr_mapping() {
+    let addr = VirtAddr::new(0x4321_4321_1000); // random unmapped address
+    assert!(translate_addr(addr).is_none());
+    page_map_addr(addr);
+    assert!(translate_addr(addr).is_some());
+    let page = unsafe { &mut *addr.as_mut_ptr::<[u64; 512]>() };
+    // make sure we can write to the entire page
+    for i in 0..page.len() {
+      page[i] = 0x1337;
+    }
+    for i in 0..page.len() {
+      assert_eq!(page[i], 0x1337);
+    }
   }
 }
