@@ -56,23 +56,23 @@ impl PageTableEntry {
   }
 
   pub fn set_present(&mut self, b: bool) -> &mut Self {
-    self.set_bit(PRESENT, b)
+    self.set_bit(b, PRESENT)
   }
   pub fn set_writable(&mut self, b: bool) -> &mut Self {
-    self.set_bit(WRITABLE, b)
+    self.set_bit(b, WRITABLE)
   }
   pub fn set_user_accessible(&mut self, b: bool) -> &mut Self {
-    self.set_bit(USER_ACCESSIBLE, b)
+    self.set_bit(b, USER_ACCESSIBLE)
   }
   pub fn set_non_executable(&mut self, b: bool) -> &mut Self {
-    self.set_bit(NON_EXECUTABLE, b)
+    self.set_bit(b, NON_EXECUTABLE)
   }
 
   fn is_bit_set(&self, bit: u64) -> bool {
     self.0 & bit != 0
   }
 
-  fn set_bit(&mut self, bit: u64, b: bool) -> &mut Self {
+  fn set_bit(&mut self, b: bool, bit: u64) -> &mut Self {
     self.0 &= !bit;
     self.0 |= bit * (b as u64);
     self
@@ -96,10 +96,10 @@ pub fn cr3() -> (u64, u64) {
   (cr3 & PHYS_ADDR_MASK, cr3 & !PHYS_ADDR_MASK)
 }
 
-pub unsafe fn active_level_four_table() -> &'static mut PageTable {
+pub fn active_level_four_table() -> &'static mut PageTable {
   let (cr3, _) = cr3();
   let addr = PhysAddr::new(cr3).to_virt();
-  &mut *addr.as_mut_ptr()
+  unsafe { &mut *addr.as_mut_ptr() }
 }
 
 pub unsafe fn translate_addr(addr: VirtAddr) -> Option<PhysAddr> {

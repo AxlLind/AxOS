@@ -17,12 +17,16 @@ impl VirtAddr {
     self.0
   }
 
-  pub unsafe fn as_mut_ptr<T>(&self) -> *mut T {
+  pub fn as_mut_ptr<T>(&self) -> *mut T {
     self.0 as *mut T
   }
 
-  pub unsafe fn as_ptr<T>(&self) -> *const T {
+  pub fn as_ptr<T>(&self) -> *const T {
     self.0 as *const T
+  }
+
+  pub fn is_page_aligned(&self) -> bool {
+    self.0.trailing_zeros() >= 12
   }
 }
 
@@ -32,7 +36,7 @@ pub struct PhysAddr(u64);
 
 impl PhysAddr {
   pub fn new(addr: u64) -> Self {
-    assert!(addr < 1 << 52);
+    assert!(addr.leading_zeros() >= 10);
     Self(addr)
   }
 
@@ -42,6 +46,10 @@ impl PhysAddr {
 
   pub fn to_virt(&self) -> VirtAddr {
     VirtAddr::new(self.0 + PHYS_MEM_OFFSET)
+  }
+
+  pub fn is_page_aligned(&self) -> bool {
+    self.0.trailing_zeros() >= 12
   }
 }
 

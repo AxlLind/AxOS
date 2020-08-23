@@ -48,6 +48,6 @@ impl FrameAllocator {
 
   pub fn free(&mut self, frame: PhysAddr) {
     // TODO: Actually do something here
-    assert_eq!(frame.as_u64() & 0xfff, 0); // check page alignment
+    assert!(frame.is_page_aligned());
   }
 }
