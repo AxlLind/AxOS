@@ -56,6 +56,23 @@ extern "x86-interrupt" fn double_fault_handler(
   hang();
 }
 
+extern "x86-interrupt" fn page_fault_handler(frame: &mut InterruptStackFrame, err_code: u64) -> ! {
+  dbg!("page fault interrupt!");
+  dbg!("{:x?}", frame);
+  dbg!("errcode {:x}", err_code);
+  hang();
+}
+
+extern "x86-interrupt" fn general_protection_fault_handler(
+  frame: &mut InterruptStackFrame,
+  err_code: u64,
+) -> ! {
+  dbg!("general protection fault interrupt!");
+  dbg!("{:x?}", frame);
+  dbg!("errcode {:x}", err_code);
+  hang();
+}
+
 lazy_static! {
   static ref TSS: TaskSegmentSelector = {
     let mut tss = TaskSegmentSelector::new();
@@ -77,9 +94,11 @@ lazy_static! {
 
   static ref IDT: InterruptDescriptorTable = {
     let mut idt = InterruptDescriptorTable::new();
-    idt[0x03].set_handler(breakpoint_handler as usize);
-    idt[0x08].set_handler(double_fault_handler as usize).with_ist(1);
-    idt[0x20].set_handler(timer_handler as usize);
+    idt[3].set_handler(breakpoint_handler as usize);
+    idt[8].set_handler(double_fault_handler as usize).with_ist(1);
+    idt[13].set_handler(general_protection_fault_handler as usize);
+    idt[14].set_handler(page_fault_handler as usize);
+    idt[32].set_handler(timer_handler as usize);
     idt
   };
 }
