@@ -1,0 +1,24 @@
+on: [push, pull_request]
+
+name: Lints
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy, bootimage, cargo-xbuild
+      - name: Fetch additional rustup components
+        run: |
+          rustup component add rust-src --toolchain=nightly
+          rustup component add llvm-tools-preview --toolchain=nightly
+      - name: Rustfmt
+        run: cargo fmt -- --check
+      - name: Clippy
+        run: cargo xclippy -- -D warnings
