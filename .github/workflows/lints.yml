@@ -27,7 +27,7 @@ jobs:
           rustup component add llvm-tools-preview --toolchain=nightly
 
       - name: Install qemu
-        run: apt-get install qemu
+        run: sudo apt-get install qemu
 
       - name: Rustfmt
         run: cargo fmt -- --check
