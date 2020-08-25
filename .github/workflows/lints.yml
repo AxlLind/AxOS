@@ -18,13 +18,12 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-          components: rustfmt, clippy
+          default: true
+          components: rustfmt, clippy, bootimage, cargo-xbuild
       - name: Fetch additional rust components
         run: |
-          cargo install bootimage
-          cargo install cargo-xbuild
-          rustup component add rust-src --toolchain=nightly
-          rustup component add llvm-tools-preview --toolchain=nightly
+          rustup component add rust-src
+          rustup component add llvm-tools-preview
 
       # The actual lints and tests
       - name: fmt
@@ -32,4 +31,4 @@ jobs:
       - name: clippy
         run: cargo xclippy -- -D warnings
       - name: tests
-        run: cargo xtest
+        run: cargo xtest 2> /dev/null
