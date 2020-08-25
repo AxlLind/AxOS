@@ -34,8 +34,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install qemu-system-x86
 
-      - run: |
-        find / ".cargo"
       - name: fmt
         run: cargo fmt -- --check
       - name: clippy
