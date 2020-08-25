@@ -5,7 +5,7 @@ echo "Running rustfmt.."
 cargo fmt -- --check
 
 echo "Running clippy.."
-touch src/main.rs # force recompilation
+touch src/**/*.rs # force recompilation
 cargo xclippy -- -D warnings
 
 echo "Running tests.."
