@@ -3,17 +3,12 @@ on: [push, pull_request]
 name: Lints and tests
 
 jobs:
-  tests:
+  lints-and-tests:
     name: Lints and tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install qemu
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu-system-x86
-      - name: Install the rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           components: rustfmt, clippy
@@ -23,11 +18,16 @@ jobs:
           cargo install cargo-xbuild
           rustup component add rust-src
           rustup component add llvm-tools-preview
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu-system-x86
 
-      # The actual lints and tests
       - name: fmt
         run: cargo fmt -- --check
       - name: clippy
-        run: cargo xclippy -- -D warnings
+        run: |
+          touch src/**/*.rs
+          cargo xclippy -- -D warnings
       - name: tests
         run: cargo xtest 2> /dev/null
