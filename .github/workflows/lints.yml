@@ -8,34 +8,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Install qemu
         run: |
           sudo apt-get update
-          sudo apt-get install qemu
-
-      - uses: actions-rs/toolchain@v1
+          sudo apt-get install qemu-system-x86_64
+      - name: Install the rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: nightly
           override: true
           components: rustfmt, clippy
-
-      - name: Fetch additional cargo components
+      - name: Fetch additional rust components
         run: |
           cargo install bootimage
           cargo install cargo-xbuild
-
-      - name: Fetch additional rustup components
-        run: |
           rustup component add rust-src --toolchain=nightly
           rustup component add llvm-tools-preview --toolchain=nightly
 
-      - name: Rustfmt
+      # The actual lints and tests
+      - name: fmt
         run: cargo fmt -- --check
-
-      - name: Clippy
+      - name: clippy
         run: cargo xclippy -- -D warnings
-
-      - name: Run tests
+      - name: tests
         run: cargo xtest
