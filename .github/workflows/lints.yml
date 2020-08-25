@@ -9,6 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install qemu
+        run: sudo apt-get install qemu --fix-missing
+
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -25,9 +28,6 @@ jobs:
         run: |
           rustup component add rust-src --toolchain=nightly
           rustup component add llvm-tools-preview --toolchain=nightly
-
-      - name: Install qemu
-        run: sudo apt-get install qemu
 
       - name: Rustfmt
         run: cargo fmt -- --check
