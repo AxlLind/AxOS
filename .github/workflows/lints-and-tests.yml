@@ -12,10 +12,10 @@ jobs:
         with:
           path: |
             target
-            ${{ env.CARGO_HOME }}/bin/
-            ${{ env.CARGO_HOME }}/registry/index/
-            ${{ env.CARGO_HOME }}/registry/cache/
-            ${{ env.CARGO_HOME }}/git/db/
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
           key: v1-build-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             v1-build-
