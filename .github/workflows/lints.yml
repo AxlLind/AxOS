@@ -1,0 +1,33 @@
+on: [push, pull_request]
+
+name: Lints and tests
+
+jobs:
+  lints-and-tests:
+    name: Lints and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          components: rustfmt, clippy
+      - name: Fetch additional rust components
+        run: |
+          cargo install bootimage
+          cargo install cargo-xbuild
+          rustup component add rust-src
+          rustup component add llvm-tools-preview
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu-system-x86
+
+      - name: fmt
+        run: cargo fmt -- --check
+      - name: clippy
+        run: |
+          touch src/**/*.rs
+          cargo xclippy -- -D warnings
+      - name: tests
+        run: cargo xtest 2> /dev/null
