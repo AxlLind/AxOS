@@ -8,14 +8,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: v1-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            v1-build-
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           components: rustfmt, clippy
       - name: Fetch additional rust components
         run: |
-          cargo install bootimage
-          cargo install cargo-xbuild
+          cargo install bootimage || true
+          cargo install cargo-xbuild || true
           rustup component add rust-src
           rustup component add llvm-tools-preview
       - name: Install qemu
