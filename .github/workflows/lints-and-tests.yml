@@ -25,8 +25,8 @@ jobs:
           components: rustfmt, clippy
       - name: Fetch additional rust components
         run: |
-          cargo install bootimage
-          cargo install cargo-xbuild
+          cargo install bootimage || true
+          cargo install cargo-xbuild || true
           rustup component add rust-src
           rustup component add llvm-tools-preview
       - name: Install qemu
