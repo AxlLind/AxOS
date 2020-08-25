@@ -8,6 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v1.0.1
+        with:
+          path: target
+          key: v1-${{ runner.OS }}-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            v1-${{ runner.OS }}-build-
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
