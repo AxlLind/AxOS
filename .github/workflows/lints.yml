@@ -13,7 +13,11 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-          components: rustfmt, clippy, bootimage, cargo-xbuild
+          components: rustfmt, clippy
+      - name: Fetch additional cargo components
+        run: |
+          cargo install bootimage
+          cargo install cargo-xbuild
       - name: Fetch additional rustup components
         run: |
           rustup component add rust-src --toolchain=nightly
