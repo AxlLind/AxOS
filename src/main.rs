@@ -11,6 +11,7 @@
 #![allow(clippy::identity_op)]
 #![allow(unused_unsafe)]
 
+#[macro_use]
 extern crate alloc;
 
 use ax_os::{hang, indexable_from_field};
@@ -50,6 +51,8 @@ fn panic_handler(info: &PanicInfo) -> ! {
 #[no_mangle]
 pub fn _start(info: &'static BootInfo) -> ! {
   initialize(&info);
+  let v = vec![1; 100];
+  dbg!("{:x?} -> {}", (&v[42]) as *const _, v[42]);
   let mut vga = VgaDevice::new();
   for (i, &c) in b"Hello world".iter().enumerate() {
     vga.write_char(i, i, c, VgaColor::Green, VgaColor::Black);

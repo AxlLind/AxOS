@@ -129,7 +129,7 @@ pub fn page_map_addr(addr: VirtAddr) {
   for &i in &addr.page_table_indexes() {
     let entry = &mut table[i as usize];
     if entry.unused() {
-      let frame_addr = FrameAllocator::the().alloc().expect("OOM");
+      let frame_addr = FrameAllocator::the().calloc().expect("OOM");
       unsafe { entry.set_addr(frame_addr) }
         .set_present(true)
         .set_writable(true)

@@ -45,8 +45,17 @@ impl FrameAllocator {
     addr
   }
 
+  pub fn calloc(&mut self) -> Option<PhysAddr> {
+    let frame_addr = self.alloc()?;
+    let page_ptr = frame_addr.to_virt().as_mut_ptr::<[u64; 512]>();
+    let page = unsafe { &mut *page_ptr };
+    page.iter_mut().for_each(|i| *i = 0);
+    Some(frame_addr)
+  }
+
   pub fn free(&mut self, frame: PhysAddr) {
     // TODO: Actually do something here
     assert!(frame.is_page_aligned());
+    unimplemented!();
   }
 }
