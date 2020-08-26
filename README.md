@@ -1,4 +1,6 @@
 # AxOS
+![test badge](https://github.com/AxlLind/AxOS/workflows/Lints%20and%20tests/badge.svg)
+
 A toy OS in Rust made just to learn more about operating systems and for fun.
 
 :warning: This is very much a work in progress
