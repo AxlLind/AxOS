@@ -6,7 +6,7 @@ function fail {
 }
 
 # use the custom githooks
-git config core.hooksPath .githooks
+git config core.hooksPath .github
 
 # General rust toolchains are needed
 if ! rustup --version > /dev/null 2>&1 ; then
