@@ -24,7 +24,7 @@ jobs:
           components: rustfmt, clippy, rust-src, llvm-tools-preview
       - name: Install additional tools
         run: |
-          cargo install bootimage
+          cargo +stable install bootimage
           sudo apt-get update
           sudo apt-get install qemu-system-x86
       - name: fmt
