@@ -22,12 +22,9 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          components: rustfmt, clippy
-      - name: Fetch additional rust components
-        run: |
-          cargo install bootimage || true
-          rustup component add rust-src
-          rustup component add llvm-tools-preview
+          components: rustfmt, clippy, rust-src, llvm-tools-preview
+      - name: Install bootimage tool
+        run: cargo install bootimage || true
       - name: Install qemu
         run: |
           sudo apt-get update
