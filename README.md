@@ -12,8 +12,8 @@ A toy OS in Rust made just to learn more about operating systems and for fun.
 - [x] Debug printing via Qemu stdout
 - [x] Interrupts handled via IDT
 - [x] External interrupts enabled via PIC
+- [x] Kernel heap allocation
 - [ ] Proper memory paging handling
-- [ ] Kernel heap allocation
 
 ## Development
 To get started run the [`setup.sh`](./setup.sh) script. To run the OS just do as you would with any other Rust program!
