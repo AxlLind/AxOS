@@ -51,6 +51,7 @@ impl<T: Fn()> TestCase for T {
 }
 
 pub fn test_runner(tests: &[&dyn TestCase]) -> ! {
+  unsafe { asm!("cli") }; // no external interrupts during testing
   for test in tests {
     let (module, name) = test.name();
     let padding = 40 - module.len() - name.len();
