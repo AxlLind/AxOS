@@ -16,11 +16,12 @@ A toy OS in Rust made just to learn more about operating systems and for fun.
 - [ ] Kernel heap allocation
 
 ## Development
-To get started run the [`setup.sh`](./setup.sh) script. Commands:
+To get started run the [`setup.sh`](./setup.sh) script. To run the OS just do as you would with any other Rust program!
 
 ```sh
-./setup.sh   # install required dependencies
-cargo xrun   # run the operating system
-cargo xcheck # check for warnings/errors without running
-cargo xtest  # run all unit and integration tests
+./setup.sh  # install required dependencies
+cargo build # build the operating system
+cargo run   # run the operating system
+cargo check # check for warnings/errors without running
+cargo test  # run all unit and integration tests
 ```

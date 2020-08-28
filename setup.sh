@@ -6,8 +6,8 @@ function fail {
 }
 
 # Use custom githooks
-git config core.hooksPath .github
 echo "Setting custom githooks path"
+git config core.hooksPath .github
 
 # General rust toolchains are needed
 if rustup --version > /dev/null 2>&1 ; then
@@ -28,13 +28,6 @@ if bootimage --help > /dev/null 2>&1 ; then
   echo "Already installed: bootimage"
 else
   cargo install bootimage || fail "bootimage"
-fi
-
-# Required to build to our custom target
-if cargo xbuild --version > /dev/null 2>&1 ; then
-  echo "Already installed: cargo-xbuild"
-else
-  cargo install cargo-xbuild || fail "cargo-xbuild"
 fi
 
 # Source files for rust core, needed to compile core to our custom target
