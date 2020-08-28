@@ -16,8 +16,8 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: v1-build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: v1-build-
+          key: v2-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: v2-build-
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
