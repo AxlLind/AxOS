@@ -24,10 +24,10 @@ else
 fi
 
 # Builds bootable images from rust source
-if bootimage --help > /dev/null 2>&1 ; then
+if bootimage --version > /dev/null 2>&1 ; then
   echo "Already installed: bootimage"
 else
-  cargo install bootimage || fail "bootimage"
+  cargo +stable install bootimage || fail "bootimage"
 fi
 
 # Source files for rust core, needed to compile core to our custom target
