@@ -26,7 +26,6 @@ jobs:
       - name: Fetch additional rust components
         run: |
           cargo install bootimage || true
-          cargo install cargo-xbuild || true
           rustup component add rust-src
           rustup component add llvm-tools-preview
       - name: Install qemu
@@ -39,6 +38,6 @@ jobs:
       - name: clippy
         run: |
           touch src/**/*.rs
-          cargo xclippy -- -D warnings
+          cargo clippy -- -D warnings
       - name: tests
-        run: cargo xtest 2> /dev/null
+        run: cargo test 2> /dev/null

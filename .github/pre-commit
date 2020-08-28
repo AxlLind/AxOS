@@ -6,7 +6,7 @@ cargo fmt -- --check
 
 echo "Running clippy.."
 touch src/**/*.rs # force recompilation
-cargo xclippy -- -D warnings
+cargo clippy -- -D warnings
 
 echo "Running tests.."
-cargo xtest 2> /dev/null
+cargo test 2> /dev/null
