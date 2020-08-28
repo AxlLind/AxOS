@@ -17,19 +17,16 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
           key: v1-build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            v1-build-
+          restore-keys: v1-build-
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           components: rustfmt, clippy, rust-src, llvm-tools-preview
-      - name: Install bootimage tool
-        run: cargo install bootimage || true
-      - name: Install qemu
+      - name: Install additional tools
         run: |
+          cargo install bootimage
           sudo apt-get update
           sudo apt-get install qemu-system-x86
-
       - name: fmt
         run: cargo fmt -- --check
       - name: clippy
