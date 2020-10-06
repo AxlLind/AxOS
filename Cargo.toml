@@ -8,7 +8,6 @@ edition = "2018"
 bootloader = { version = "0.9", features = ["map_physical_memory"] }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 spin = "0.5"
-rlibc = "1.0"
 
 [package.metadata.bootimage]
 run-args = ["-serial", "stdio"]

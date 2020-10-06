@@ -9,11 +9,6 @@
 #![allow(clippy::missing_safety_doc)] // library lints
 #![allow(clippy::new_without_default)]
 
-// When using cargo's -Zbuild-std some symbols like memcpy, memset etc are not
-// included, so we need to depend on this crate until this issue is fixed:
-// https://github.com/rust-lang/wg-cargo-std-aware/issues/53
-extern crate rlibc;
-
 #[macro_use]
 pub mod dbg_print;
 pub mod interrupts;
