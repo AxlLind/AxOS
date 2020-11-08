@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 bootloader = { version = "0.9", features = ["map_physical_memory"] }
+bitflags = "1.2"
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 spin = "0.5"
 
