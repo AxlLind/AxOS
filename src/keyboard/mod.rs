@@ -42,33 +42,32 @@ impl KeyModifiers {
   pub fn scroll_lock(&self) -> bool {
     self.intersects(Self::SCROLL_LOCK)
   }
+
+  fn update(&mut self, key: Key, pressed: bool) {
+    match (pressed, key) {
+      // hold-down keys are set true on key-down and false on key-up
+      (_, Key::Alt) => self.set(KeyModifiers::ALT, pressed),
+      (_, Key::Ctrl) => self.set(KeyModifiers::CTRL, pressed),
+      (_, Key::LeftShift) => self.set(KeyModifiers::SHIFT_LEFT, pressed),
+      (_, Key::RightShift) => self.set(KeyModifiers::SHIFT_RIGHT, pressed),
+      // lock keys are toggled on key-down event
+      (true, Key::NumLock) => self.toggle(KeyModifiers::NUM_LOCK),
+      (true, Key::CapsLock) => self.toggle(KeyModifiers::CAPS_LOCK),
+      (true, Key::ScrollLock) => self.toggle(KeyModifiers::SCROLL_LOCK),
+      _ => {}
+    }
+  }
 }
 
 // safety: keyboard events don't overlap, can safely read/write
 static mut MODIFIERS: KeyModifiers = KeyModifiers::empty();
-
-fn update_modifiers(key: Key, pressed: bool) {
-  let modifiers = unsafe { &mut MODIFIERS };
-  match (pressed, key) {
-    // hold-down keys are set true on key-down and false on key-up
-    (_, Key::Alt) => modifiers.set(KeyModifiers::ALT, pressed),
-    (_, Key::Ctrl) => modifiers.set(KeyModifiers::CTRL, pressed),
-    (_, Key::LeftShift) => modifiers.set(KeyModifiers::SHIFT_LEFT, pressed),
-    (_, Key::RightShift) => modifiers.set(KeyModifiers::SHIFT_RIGHT, pressed),
-    // lock keys are toggled on key-down event
-    (true, Key::NumLock) => modifiers.toggle(KeyModifiers::NUM_LOCK),
-    (true, Key::CapsLock) => modifiers.toggle(KeyModifiers::CAPS_LOCK),
-    (true, Key::ScrollLock) => modifiers.toggle(KeyModifiers::SCROLL_LOCK),
-    _ => {}
-  }
-}
 
 pub fn handle_keyboard_event(scan_code: u8) {
   let (key, pressed) = match scan_set_1::decode_key(scan_code) {
     Some(pair) => pair,
     None => return dbg!("Warn: Invalid scan code {}", scan_code),
   };
-  update_modifiers(key, pressed);
+  unsafe { MODIFIERS.update(key, pressed) };
   if pressed {
     if let Some(c) = key.to_ascii(unsafe { MODIFIERS }) {
       dbg_no_ln!("{}", c);
