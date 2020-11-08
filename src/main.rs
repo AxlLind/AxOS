@@ -23,6 +23,7 @@ mod dbg_print;
 mod allocator;
 mod interrupts;
 mod io;
+mod keyboard;
 mod mem;
 mod serial_port;
 mod vga_device;

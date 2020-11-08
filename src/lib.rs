@@ -13,6 +13,7 @@
 pub mod dbg_print;
 pub mod interrupts;
 mod io;
+mod keyboard;
 mod serial_port;
 
 pub fn hlt_loop() -> ! {

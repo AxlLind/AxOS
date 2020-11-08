@@ -1,4 +1,6 @@
 use crate::hang;
+use crate::io;
+use crate::keyboard;
 use core::mem::size_of;
 use lazy_static::lazy_static;
 
@@ -43,8 +45,13 @@ extern "x86-interrupt" fn breakpoint_handler(frame: &mut InterruptStackFrame) {
 }
 
 extern "x86-interrupt" fn timer_handler(_: &mut InterruptStackFrame) {
-  dbg_no_ln!(".");
   unsafe { pic::end_of_interrupt(0) };
+}
+
+extern "x86-interrupt" fn keyboard_handler(_: &mut InterruptStackFrame) {
+  let scan_code = io::read(0x60);
+  keyboard::handle_keyboard_event(scan_code);
+  unsafe { pic::end_of_interrupt(1) };
 }
 
 extern "x86-interrupt" fn double_fault_handler(
@@ -99,6 +106,7 @@ lazy_static! {
     idt[13].set_handler(general_protection_fault_handler as usize);
     idt[14].set_handler(page_fault_handler as usize);
     idt[32].set_handler(timer_handler as usize);
+    idt[33].set_handler(keyboard_handler as usize);
     idt
   };
 }
