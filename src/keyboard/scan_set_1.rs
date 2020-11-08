@@ -2,7 +2,7 @@ use super::KeyModifiers;
 use core::mem;
 
 #[allow(unused)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 pub enum Key {
   _Unknown     = 0x00,
@@ -155,4 +155,74 @@ pub fn decode_key(scan_code: u8) -> Option<(Key, bool)> {
   };
   let key = Key::from_code(key_code)?;
   Some((key, pressed))
+}
+
+mod tests {
+  use super::*;
+
+  #[test_case]
+  fn decode_valid() {
+    assert_eq!(decode_key(0x10), Some((Key::Q, true)));
+    assert_eq!(decode_key(0x90), Some((Key::Q, false)));
+
+    assert_eq!(decode_key(0x58), Some((Key::F12, true)));
+    assert_eq!(decode_key(0x58 + 0x80), Some((Key::F12, false)));
+  }
+
+  #[test_case]
+  fn decode_invalid() {
+    assert_eq!(decode_key(0), None);
+    assert_eq!(decode_key(0x54), None);
+    assert_eq!(decode_key(0x55), None);
+    assert_eq!(decode_key(0x56), None);
+
+    assert_eq!(decode_key(0x80 + 0), None);
+    assert_eq!(decode_key(0x80 + 0x54), None);
+    assert_eq!(decode_key(0x80 + 0x55), None);
+    assert_eq!(decode_key(0x80 + 0x56), None);
+  }
+
+  #[test_case]
+  fn ascii_with_modifiers() {
+    let no_modifiers = KeyModifiers::empty();
+    let with_caps = KeyModifiers::CAPS_LOCK;
+    let with_shift = KeyModifiers::SHIFT_LEFT;
+    let with_caps_and_shift = with_caps | with_shift;
+
+    assert_eq!(Key::A.to_ascii(no_modifiers), Some('a'));
+    assert_eq!(Key::A.to_ascii(with_caps), Some('A'));
+    assert_eq!(Key::A.to_ascii(with_shift), Some('A'));
+    assert_eq!(Key::A.to_ascii(with_caps_and_shift), Some('A'));
+
+    assert_eq!(Key::Minus.to_ascii(no_modifiers), Some('-'));
+    assert_eq!(Key::Comma.to_ascii(no_modifiers), Some(','));
+    assert_eq!(Key::Slash.to_ascii(no_modifiers), Some('/'));
+
+    assert_eq!(Key::Minus.to_ascii(with_caps), Some('-'));
+    assert_eq!(Key::Comma.to_ascii(with_caps), Some(','));
+    assert_eq!(Key::Slash.to_ascii(with_caps), Some('/'));
+
+    assert_eq!(Key::Minus.to_ascii(with_shift), Some('_'));
+    assert_eq!(Key::Comma.to_ascii(with_shift), Some('<'));
+    assert_eq!(Key::Slash.to_ascii(with_shift), Some('?'));
+
+    assert_eq!(Key::Minus.to_ascii(with_caps_and_shift), Some('_'));
+    assert_eq!(Key::Comma.to_ascii(with_caps_and_shift), Some('<'));
+    assert_eq!(Key::Slash.to_ascii(with_caps_and_shift), Some('?'));
+
+    assert_eq!(Key::CapsLock.to_ascii(no_modifiers), None);
+    assert_eq!(Key::CapsLock.to_ascii(with_caps), None);
+    assert_eq!(Key::CapsLock.to_ascii(with_shift), None);
+    assert_eq!(Key::CapsLock.to_ascii(with_caps_and_shift), None);
+  }
+
+  #[test_case]
+  fn invalid_letters() {
+    let modifiers = KeyModifiers::empty();
+    assert_eq!(Key::_Unknown.to_ascii(modifiers), None);
+    assert_eq!(Key::_Unknown1.to_ascii(modifiers), None);
+    assert_eq!(Key::_Unknown2.to_ascii(modifiers), None);
+    assert_eq!(Key::_Unknown3.to_ascii(modifiers), None);
+    assert_eq!(Key::F1.to_ascii(modifiers), None);
+  }
 }
