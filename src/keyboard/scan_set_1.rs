@@ -133,14 +133,14 @@ impl Key {
     }
   }
 
-  pub fn to_ascii(&self, modifiers: KeyModifiers) -> Option<char> {
+  pub fn to_ascii(self, modifiers: KeyModifiers) -> Option<char> {
     let shifted = modifiers.shift() || (modifiers.caps_lock() && self.is_letter());
     let map = if shifted {
       ASCII_SHIFT_KEY_MAP
     } else {
       ASCII_KEY_MAP
     };
-    match map[*self as usize] {
+    match map[self as usize] {
       '\0' => None,
       c => Some(c),
     }
