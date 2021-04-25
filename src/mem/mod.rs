@@ -53,7 +53,7 @@ impl PhysAddr {
     self.0
   }
 
-  pub fn to_virt(&self) -> VirtAddr {
+  pub fn to_virt(self) -> VirtAddr {
     VirtAddr::new(self.0 + PHYS_MEM_OFFSET)
   }
 
