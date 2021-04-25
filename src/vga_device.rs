@@ -1,10 +1,9 @@
 #![allow(unused)]
-use core::slice;
 
 const ROWS: usize = 25;
 const COLS: usize = 80;
 
-#[repr(u8)] // force rust to represent this as we expect
+#[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 pub enum VgaColor {
   Black         = 0x0,
@@ -25,41 +24,52 @@ pub enum VgaColor {
   White         = 0xF,
 }
 
-#[repr(C)] // force rust to represent this as we expect
+#[repr(C)]
 #[derive(Debug, Clone, Copy)]
 struct VgaChar {
   c:     u8,
   color: u8,
 }
 
-type Buffer = [[VgaChar; COLS]; ROWS];
+type VgaBuffer = [[VgaChar; COLS]; ROWS];
 
 pub struct VgaDevice {
-  mem: &'static mut Buffer,
-  row: usize,
-  col: usize,
+  buf:   &'static mut VgaBuffer,
+  color: u8,
+  row:   usize,
+  col:   usize,
 }
 
 impl VgaDevice {
   pub fn new() -> Self {
-    // Map the range 0xb8000-0xb8FA0 directly as a 25x80 2d array.
-    let mem = unsafe { &mut *(0xb8000 as *mut Buffer) };
+    // Map the range 0xb8000-0xb8fa0 directly as a 25x80 2d array.
+    let buf = unsafe { &mut *(0xb8000 as *mut VgaBuffer) };
     Self {
-      mem,
+      buf,
+      color: 0x02, // green text, black background
       row: 0,
       col: 0,
     }
   }
 
-  pub fn write_char(
-    &mut self,
-    row: usize,
-    col: usize,
-    c: u8,
-    text_color: VgaColor,
-    background_color: VgaColor,
-  ) {
-    let color = text_color as u8 | (background_color as u8) << 4;
-    self.mem[row][col] = VgaChar { c, color };
+  pub fn reset_color(&mut self) {
+    self.color = 0x02;
+  }
+
+  pub fn set_color(&mut self, color: VgaColor) {
+    self.color &= 0xf0;
+    self.color |= color as u8;
+  }
+
+  pub fn set_background_color(&mut self, color: VgaColor) {
+    self.color &= 0x0f;
+    self.color |= (color as u8) << 4;
+  }
+
+  pub fn write_char(&mut self, row: usize, col: usize, c: u8) {
+    self.buf[row][col] = VgaChar {
+      c,
+      color: self.color,
+    };
   }
 }
