@@ -26,9 +26,10 @@ mod io;
 mod keyboard;
 mod mem;
 mod serial_port;
-mod vga_device;
+mod vga;
+
 use mem::frame_allocator::FrameAllocator;
-use vga_device::{VgaColor, VgaDevice};
+use vga::VgaDevice;
 
 fn initialize(info: &'static BootInfo) {
   dbg_print::initialize();
@@ -55,11 +56,9 @@ pub fn _start(info: &'static BootInfo) -> ! {
   let v = vec![1; 100];
   dbg!("{:x?} -> {}", (&v[42]) as *const _, v[42]);
   let mut vga = VgaDevice::new();
-  vga.set_color(VgaColor::Black);
-  vga.set_background_color(VgaColor::Gray);
   for (i, &c) in b"Hello world".iter().enumerate() {
+    vga.set_color(unsafe { core::mem::transmute(i as u8 + 1) });
     vga.write_char(i, i, c);
-    vga.reset_color();
   }
   ax_os::hlt_loop();
 }

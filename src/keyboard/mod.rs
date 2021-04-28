@@ -65,7 +65,7 @@ static mut MODIFIERS: KeyModifiers = KeyModifiers::empty();
 pub fn handle_keyboard_event(scan_code: u8) {
   let (key, pressed) = match scan_set_1::decode_key(scan_code) {
     Some(pair) => pair,
-    None => return dbg!("Warn: Invalid scan code {}", scan_code),
+    None => return dbg!("Warn: Invalid scan code {:x}", scan_code),
   };
   unsafe { MODIFIERS.update(key, pressed) };
   if pressed {
