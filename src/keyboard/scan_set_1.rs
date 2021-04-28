@@ -96,22 +96,8 @@ pub enum Key {
   F12          = 0x58,
 }
 
-static ASCII_KEY_MAP: [char; 0x59] = [
-  '\0', '\x1b', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\x08', '\t', 'q', 'w',
-  'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n', '\0', 'a', 's', 'd', 'f', 'g', 'h', 'j',
-  'k', 'l', ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\0',
-  '*', '\0', ' ', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
-  '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.', '\0', '\0', '\0', '\0', '\0',
-];
-
-static ASCII_SHIFT_KEY_MAP: [char; 0x59] = [
-  '\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\0', '\0', 'Q', 'W',
-  'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\0', '\0', 'A', 'S', 'D', 'F', 'G', 'H', 'J',
-  'K', 'L', ':', '"', '~', '\0', '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', '\0', '\0',
-  '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
-  '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
-  '\0',
-];
+static ASCII_KEY_MAP: &[u8] = b"\0\x1b1234567890-=\x08\tqwertyuiop[]\n\0asdfghjkl;\'`\0\\zxcvbnm,./\0*\0 \0\0\0\0\0\0\0\0\0\0\0\0\0789-456+1230.\0\0\0\0\0";
+static ASCII_SHIFT_KEY_MAP: &[u8] = b"\0\0!@#$%^&*()_+\0\0QWERTYUIOP{}\0\0ASDFGHJKL:\"~\0|ZXCVBNM<>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
 impl Key {
   pub fn from_code(scan_code: u8) -> Option<Self> {
@@ -122,15 +108,10 @@ impl Key {
     }
   }
 
+  #[rustfmt::skip]
   pub fn is_letter(&self) -> bool {
     use Key::*;
-
-    #[allow(clippy::match_like_matches_macro)]
-    match self {
-      A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W
-      | X | Y | Z => true,
-      _ => false,
-    }
+    matches!(self, A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z)
   }
 
   pub fn to_ascii(self, modifiers: KeyModifiers) -> Option<char> {
@@ -141,8 +122,8 @@ impl Key {
       ASCII_KEY_MAP
     };
     match map[self as usize] {
-      '\0' => None,
-      c => Some(c),
+      0 => None,
+      b => Some(b as char),
     }
   }
 }
