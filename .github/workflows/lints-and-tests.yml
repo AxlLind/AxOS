@@ -18,9 +18,8 @@ jobs:
             ~/.cargo/git/db/
           key: v2-build-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: v2-build-
-      - name: Install additional tools
+      - name: Install dependencies
         run: |
-          rustup show
           cargo +stable install bootimage || true
           sudo apt-get update
           sudo apt-get install qemu-system-x86
