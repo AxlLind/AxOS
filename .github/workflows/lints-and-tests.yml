@@ -20,6 +20,7 @@ jobs:
           restore-keys: v2-build-
       - name: Install dependencies
         run: |
+          rustup show
           cargo +stable install bootimage || true
           sudo apt-get update
           sudo apt-get install qemu-system-x86
